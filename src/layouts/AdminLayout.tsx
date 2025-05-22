@@ -28,8 +28,8 @@ const drawerWidthCollapsed = 70;
 const navItems = [
   { text: 'Registrar Cliente', icon: <PersonAddIcon />, path: '/register-client' },
   { text: 'Historial Cliente', icon: <HistoryIcon />, path: '/history-client' },
-  { text: 'Servicios', icon: <BuildIcon />, path: '/servicios' },
-  { text: 'Formulario de alergias', icon: <HealingIcon />, path: '/alergias' },
+  { text: 'Servicios', icon: <BuildIcon />, path: '/services' },
+  { text: 'Formulario de alergias', icon: <HealingIcon />, path: '/allergy' },
   { text: 'Agendar cita', icon: <CalendarMonthIcon />, path: '/agendar' },
   { text: 'Ver cita', icon: <EventNoteIcon />, path: '/ver-cita' },
 ];

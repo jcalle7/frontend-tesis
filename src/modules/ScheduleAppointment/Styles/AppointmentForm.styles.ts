@@ -1,6 +1,6 @@
 import { SxProps } from '@mui/material';
 
-export const formContainer: SxProps = {
+export const formContainerAppointment: SxProps = {
   width: '100%',
   maxWidth: 600,
   display: 'flex',
@@ -8,14 +8,14 @@ export const formContainer: SxProps = {
   gap: 2,
 };
 
-export const buttonGroup: SxProps = {
+export const buttonGroupAppoinment: SxProps = {
   display: 'flex',
   justifyContent: 'flex-start',
   gap: 2,
   mt: 2,
 };
 
-export const buttonStyle: SxProps = {
+export const buttonStyleAppointment: SxProps = {
   minWidth: 130,
   paddingX: 2,
   paddingY: 1,

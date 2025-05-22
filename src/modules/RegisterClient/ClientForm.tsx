@@ -2,7 +2,7 @@ import { Box, Button, TextField } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import ListIcon from '@mui/icons-material/List';
 import { useState } from 'react';
-import { ClientFormData } from './types';
+import { ClientFormData } from './TypesRegister';
 import { formContainer, buttonGroup, buttonStyle } from '../RegisterClient/Styles/ClientForm.styles';
 
 const initialForm: ClientFormData = {
@@ -46,7 +46,7 @@ export default function ClientForm() {
         <Button variant="outlined" color="error" sx={buttonStyle}>
           CANCELAR
         </Button>
-        <Button variant="contained" color="success" startIcon={<ListIcon />} sx={buttonStyle}>
+        <Button variant="contained" color="primary" startIcon={<ListIcon />} sx={buttonStyle}>
           LISTAR
         </Button>
       </Box>
