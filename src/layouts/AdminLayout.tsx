@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   AppBar,
   Box,
@@ -12,7 +12,9 @@ import {
   ListItemText,
   Toolbar,
   Typography,
+  Button,
 } from '@mui/material';
+import { supabase } from '../components/lib/supabaseClient';
 import MenuIcon from '@mui/icons-material/Menu';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import HistoryIcon from '@mui/icons-material/History';
@@ -20,6 +22,8 @@ import BuildIcon from '@mui/icons-material/Build';
 import HealingIcon from '@mui/icons-material/Healing';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import EventNoteIcon from '@mui/icons-material/EventNote';
+import BusinessIcon from '@mui/icons-material/Business'; 
+
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 
 const drawerWidthExpanded = 230;
@@ -29,15 +33,34 @@ const navItems = [
   { text: 'Registrar Cliente', icon: <PersonAddIcon />, path: '/register-client' },
   { text: 'Historial Cliente', icon: <HistoryIcon />, path: '/history-client' },
   { text: 'Servicios', icon: <BuildIcon />, path: '/services' },
-  { text: 'Formulario de alergias', icon: <HealingIcon />, path: '/allergy' },
+  { text: 'Formularios', icon: <HealingIcon />, path: '/allergy' },
   { text: 'Agendar cita', icon: <CalendarMonthIcon />, path: '/agendar' },
   { text: 'Ver cita', icon: <EventNoteIcon />, path: '/ver-cita' },
+  { text: 'Registrar Empresa', icon: <BusinessIcon />, path: '/register-company', role: 'superadmin' },
 ];
 
 export default function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      const role = user?.user_metadata?.role;
+      setUserRole(role ?? null);
+    });
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/login');
+  };
+
+  const filteredNavItems = navItems.filter((item) => {
+    if (item.role === 'superadmin') return userRole === 'superadmin';
+    return true;
+  });
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -46,11 +69,11 @@ export default function AdminLayout() {
       {/* TOPBAR */}
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <IconButton 
-          color="inherit" 
-          edge="start" 
-          onClick={() => setCollapsed(!collapsed)}
-          sx={{ mr: 2 }}
+          <IconButton
+            color="inherit"
+            edge="start"
+            onClick={() => setCollapsed(!collapsed)}
+            sx={{ mr: 2 }}
           >
             <MenuIcon />
           </IconButton>
@@ -59,11 +82,12 @@ export default function AdminLayout() {
             BRUSH ART NAILS - Panel Administrativo
           </Typography>
 
-          <Box sx={{ width: 40 }} />
+          <Button color="inherit" onClick={handleLogout}>
+            Cerrar sesión
+          </Button>
         </Toolbar>
       </AppBar>
 
-      
       {/* SIDEBAR */}
       <Drawer
         variant="permanent"
@@ -81,39 +105,38 @@ export default function AdminLayout() {
       >
         <Toolbar />
         <List>
-  {navItems.map((item) => {
-    const isActive = location.pathname === item.path;
+          {filteredNavItems.map((item) => {
+            const isActive = location.pathname === item.path;
 
-    return (
-      <ListItem key={item.text} disablePadding>
-        <ListItemButton
-          onClick={() => navigate(item.path)}
-          selected={isActive}
-          sx={{
-            ...(isActive && {
-              backgroundColor: '#e0e0e0',
-              '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
-                color: 'primary.main',
-                fontWeight: 'bold',
-              },
-            }),
-            '&:hover': {
-              backgroundColor: '#f5f5f5',
-            },
-          }}
-        >
-          <ListItemIcon>{item.icon}</ListItemIcon>
-          {!collapsed && <ListItemText primary={item.text} />}
-        </ListItemButton>
-      </ListItem>
-    );
-  })}
-</List>
+            return (
+              <ListItem key={item.text} disablePadding>
+                <ListItemButton
+                  onClick={() => navigate(item.path)}
+                  selected={isActive}
+                  sx={{
+                    ...(isActive && {
+                      backgroundColor: '#e0e0e0',
+                      '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
+                        color: 'primary.main',
+                        fontWeight: 'bold',
+                      },
+                    }),
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5',
+                    },
+                  }}
+                >
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  {!collapsed && <ListItemText primary={item.text} />}
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
+        </List>
       </Drawer>
 
       {/* CONTENIDO PRINCIPAL */}
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}
-      >
+      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Outlet />
       </Box>
     </Box>

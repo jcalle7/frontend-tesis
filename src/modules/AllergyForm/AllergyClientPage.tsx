@@ -6,7 +6,7 @@ export default function AllergyClientPage() {
   return (
     <Box sx={ containerStylesAllergy }>
       <Typography variant="h4" sx={titleStylesAllergy}>
-        FORMULARIO DE ALERGIAS
+        CREAR FORMULARIOS
       </Typography>
       <AllergyFormData />
     </Box>
