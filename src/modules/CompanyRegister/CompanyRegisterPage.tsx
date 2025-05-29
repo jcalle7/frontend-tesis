@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { Box, Typography, TextField, Button, Alert } from '@mui/material';
-import { supabase } from '../../components/lib/supabaseClient';
+import {
+  Box, Typography, TextField, Button, Snackbar, Alert, Backdrop, CircularProgress,
+} from '@mui/material';
 import {
   formContainerCompany,
   sectionTitleCompany,
   buttonStyleCompany,
   TitlePrincipalCompany,
 } from '../CompanyRegister/Styles/CompanyRegisterPage.styles';
-
 
 export default function CompanyRegisterPage() {
   const [form, setForm] = useState({
@@ -20,52 +20,58 @@ export default function CompanyRegisterPage() {
     adminPassword: '',
   });
 
-  const [successMsg, setSuccessMsg] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const isFormValid = () => {
+    return Object.values(form).every((value) => value.trim() !== '');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSuccessMsg('');
-    setErrorMsg('');
 
-    // 1. Insertar empresa
-    const { data: company, error: companyError } = await supabase
-      .from('companies')
-      .insert([{
-        name: form.name,
-        ruc: form.ruc,
-        phone: form.phone,
-        email: form.email,
-        address: form.address,
-      }])
-      .select()
-      .single();
-
-    if (companyError) {
-      setErrorMsg('❌ Error al crear la empresa: ' + companyError.message);
+    if (!isFormValid()) {
+      setSnackbar({ open: true, message: '⚠️ Todos los campos son obligatorios.', severity: 'error' });
       return;
     }
 
-    // 2. Crear usuario admin y asociarlo a esa empresa
-    const { error: userError } = await supabase.auth.admin.createUser({
-      email: form.adminEmail,
-      password: form.adminPassword,
-      user_metadata: {
-        role: 'admin',
-        company_id: company.id,
+    setLoading(true);
+
+    const response = await fetch('https://vmvwijxfuchcehsnchef.functions.supabase.co/register_company_with_admin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Optional: Puedes enviar un token aquí si luego quieres seguridad extra
+        // 'x-admin-token': 'TU_TOKEN_INTERNO_SECRETO'
       },
+      body: JSON.stringify({
+        company: {
+          name: form.name,
+          ruc: form.ruc,
+          phone: form.phone,
+          email: form.email,
+          address: form.address,
+        },
+        admin: {
+          email: form.adminEmail,
+          password: form.adminPassword,
+        },
+      }),
     });
 
-    if (userError) {
-      setErrorMsg('❌ Error al crear el usuario: ' + userError.message);
+    const result = await response.json();
+    setLoading(false);
+
+    if (!response.ok) {
+      setSnackbar({ open: true, message: '❌ ' + result.error, severity: 'error' });
       return;
     }
 
-    setSuccessMsg('✅ Empresa y usuario creados correctamente');
+    setSnackbar({ open: true, message: '✅ Empresa y usuario creados correctamente', severity: 'success' });
     setForm({
       name: '', ruc: '', phone: '', email: '', address: '',
       adminEmail: '', adminPassword: '',
@@ -78,25 +84,40 @@ export default function CompanyRegisterPage() {
         REGISTRAR EMPRESA
       </Typography>
 
-      {successMsg && <Alert severity="success">{successMsg}</Alert>}
-      {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+      <TextField label="Nombre" name="name" value={form.name} onChange={handleChange} />
+      <TextField label="RUC" name="ruc" value={form.ruc} onChange={handleChange} />
+      <TextField label="Teléfono" name="phone" value={form.phone} onChange={handleChange} />
+      <TextField label="Email de la empresa" name="email" value={form.email} onChange={handleChange} />
+      <TextField label="Dirección" name="address" value={form.address} onChange={handleChange} />
 
-        <TextField label="Nombre" name="name" placeholder='Ingresa el nombre de un administrador' value={form.name} onChange={handleChange} />
-        <TextField label="RUC" name="ruc" placeholder='Ingresa el número RUC de un administrador' value={form.ruc} onChange={handleChange} />
-        <TextField label="Teléfono" name="phone" placeholder='Ingresa el número de teléfono de un administrador' value={form.phone} onChange={handleChange} />
-        <TextField label="Email de la empresa" name="email" placeholder='Ingresa un email válido de un administrador' value={form.email} onChange={handleChange} />
-        <TextField label="Dirección" name="address" placeholder='Ingresa la dirección del local del administrador' value={form.address} onChange={handleChange} />
+      <Typography variant="h6" sx={sectionTitleCompany}>
+        Usuario Administrador
+      </Typography>
 
-        <Typography variant="h6" sx={sectionTitleCompany}>
-          Usuario Administrador
-        </Typography>
+      <TextField label="Correo del admin" name="adminEmail" value={form.adminEmail} onChange={handleChange} />
+      <TextField label="Contraseña" name="adminPassword" type="password" value={form.adminPassword} onChange={handleChange} />
 
-        <TextField label="Correo del admin" name="adminEmail" placeholder='Ingresa el email registrado anteriormente del administrador' value={form.adminEmail} onChange={handleChange} />
-        <TextField label="Contraseña" name="adminPassword" placeholder='Ingresa una contraseña segura para el administrador' type="password" value={form.adminPassword} onChange={handleChange} />
+      <Button type="submit" variant="contained" sx={buttonStyleCompany}>
+        GUARDAR
+      </Button>
 
-        <Button type="submit" variant="contained" sx={buttonStyleCompany}>
-          GUARDAR
-        </Button>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
+      <Backdrop open={loading} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </Box>
   );
 }
