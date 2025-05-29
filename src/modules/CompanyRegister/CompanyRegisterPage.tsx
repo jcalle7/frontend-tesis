@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import { Box, Typography, TextField, Button, Alert } from '@mui/material';
 import { supabase } from '../../components/lib/supabaseClient';
+import {
+  formContainerCompany,
+  sectionTitleCompany,
+  buttonStyleCompany,
+  TitlePrincipalCompany,
+} from '../CompanyRegister/Styles/CompanyRegisterPage.styles';
+
 
 export default function CompanyRegisterPage() {
   const [form, setForm] = useState({
@@ -66,25 +73,30 @@ export default function CompanyRegisterPage() {
   };
 
   return (
-    <Box sx={{ maxWidth: 500, mx: 'auto', mt: 5 }}>
-      <Typography variant="h5" gutterBottom>Registrar Empresa</Typography>
+    <Box component="form" onSubmit={handleSubmit} sx={formContainerCompany}>
+      <Typography variant="h4" sx={TitlePrincipalCompany}>
+        REGISTRAR EMPRESA
+      </Typography>
 
       {successMsg && <Alert severity="success">{successMsg}</Alert>}
       {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
-      <form onSubmit={handleSubmit}>
-        <TextField fullWidth label="Nombre" name="name" value={form.name} onChange={handleChange} margin="normal" />
-        <TextField fullWidth label="RUC" name="ruc" value={form.ruc} onChange={handleChange} margin="normal" />
-        <TextField fullWidth label="Teléfono" name="phone" value={form.phone} onChange={handleChange} margin="normal" />
-        <TextField fullWidth label="Email de la empresa" name="email" value={form.email} onChange={handleChange} margin="normal" />
-        <TextField fullWidth label="Dirección" name="address" value={form.address} onChange={handleChange} margin="normal" />
+        <TextField label="Nombre" name="name" placeholder='Ingresa el nombre de un administrador' value={form.name} onChange={handleChange} />
+        <TextField label="RUC" name="ruc" placeholder='Ingresa el número RUC de un administrador' value={form.ruc} onChange={handleChange} />
+        <TextField label="Teléfono" name="phone" placeholder='Ingresa el número de teléfono de un administrador' value={form.phone} onChange={handleChange} />
+        <TextField label="Email de la empresa" name="email" placeholder='Ingresa un email válido de un administrador' value={form.email} onChange={handleChange} />
+        <TextField label="Dirección" name="address" placeholder='Ingresa la dirección del local del administrador' value={form.address} onChange={handleChange} />
 
-        <Typography variant="h6" sx={{ mt: 3 }}>Usuario Administrador</Typography>
-        <TextField fullWidth label="Correo del admin" name="adminEmail" value={form.adminEmail} onChange={handleChange} margin="normal" />
-        <TextField fullWidth label="Contraseña" name="adminPassword" type="password" value={form.adminPassword} onChange={handleChange} margin="normal" />
+        <Typography variant="h6" sx={sectionTitleCompany}>
+          Usuario Administrador
+        </Typography>
 
-        <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>Guardar</Button>
-      </form>
+        <TextField label="Correo del admin" name="adminEmail" placeholder='Ingresa el email registrado anteriormente del administrador' value={form.adminEmail} onChange={handleChange} />
+        <TextField label="Contraseña" name="adminPassword" placeholder='Ingresa una contraseña segura para el administrador' type="password" value={form.adminPassword} onChange={handleChange} />
+
+        <Button type="submit" variant="contained" sx={buttonStyleCompany}>
+          GUARDAR
+        </Button>
     </Box>
   );
 }

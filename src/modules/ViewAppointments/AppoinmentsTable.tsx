@@ -1,6 +1,12 @@
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
-import { Button, Stack, Chip } from '@mui/material';
+import { Button, Chip } from '@mui/material';
 import { AppointmentData } from '../ViewAppointments/TypesCitas';
+import {
+  actionButtonsContainerAppointments,
+  acceptButtonStyleAppointments,
+  cancelButtonStyleAppointments,
+} from '../ViewAppointments/Styles/AppointmentTable.styles';
+
 
 interface AppointmentTableProps {
   rows: AppointmentData[];
@@ -16,8 +22,8 @@ export default function AppointmentTable({ rows, onAccept, onCancel }: Appointme
       headerName: 'Estado', 
       flex: 1,
       renderCell: (params: GridRenderCellParams) => {
-        const color = params.value === 'Aceptada' ? 'success' : params.value === 'Pendiente' ? 'warning' : 'error';
-        return <Chip label={params.value} color={color as any} />;
+        const color: 'success' | 'warning' | 'error' = params.value === 'Aceptada' ? 'success' : params.value === 'Pendiente' ? 'warning' : 'error';
+        return <Chip label={params.value} color={color} />;
       },
     },
     { field: 'fecha', headerName: 'Fecha', flex: 1 },
@@ -27,16 +33,26 @@ export default function AppointmentTable({ rows, onAccept, onCancel }: Appointme
       headerName: 'Acciones',
       flex: 1.5,
       renderCell: (params: GridRenderCellParams) => (
-        <Stack direction="row" spacing={1}>
-          <Button color="primary" variant="contained" onClick={() => onAccept(params.row.id)}>
-            ACEPTAR
-          </Button>
-          <Button color="error" variant="outlined" onClick={() => onCancel(params.row.id)}>
-            CANCELAR
-          </Button>
-        </Stack>
+        <div style={actionButtonsContainerAppointments as React.CSSProperties}>
+        <Button
+        color="primary"
+        variant="contained"
+        onClick={() => onAccept(params.row.id)}
+        sx={acceptButtonStyleAppointments}
+        >
+          ACEPTAR
+        </Button>
+        <Button
+        color="error"
+        variant="outlined"
+        onClick={() => onCancel(params.row.id)}
+        sx={cancelButtonStyleAppointments}
+        >
+          CANCELAR
+        </Button>
+      </div>
       ),
-    },
+      }
   ];
 
   return (

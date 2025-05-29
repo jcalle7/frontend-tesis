@@ -1,5 +1,4 @@
-import { Box, TextField, Typography, Stack, Button } from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
+import { Box, TextField, Typography, Stack } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClientTable from '../ClientHistory/ClientTable';
 import { ClientHistory } from '../ClientHistory/TypesHistory'; 
@@ -13,6 +12,8 @@ const dummyData: ClientHistory[] = [
       citasPasadas: 5,
       servicios: ['Manicure', 'Pedicure'],
       alertaSalud: true,
+      detalleAlerta: 'Alergia a acrílicos y acetona',
+
     },
     {
       id: '2',
@@ -43,12 +44,6 @@ export default function ClientHistoryPage() {
 
       <ClientTable rows={dummyData}/>
       <Stack direction="row" spacing={2} justifyContent="center" mt={3}>
-        <Button variant="contained" color="success" size='large' startIcon={<SaveIcon />}>
-          Guardar
-        </Button>
-        <Button variant="outlined" color="error" size='large'>
-          Cancelar
-        </Button>
       </Stack>
     </Box>
   );
