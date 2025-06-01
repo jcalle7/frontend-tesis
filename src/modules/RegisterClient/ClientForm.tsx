@@ -2,8 +2,9 @@ import { Box, Button, TextField } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import ListIcon from '@mui/icons-material/List';
 import { useState } from 'react';
-import { ClientFormData } from './TypesRegister';
-import { formContainer, buttonGroup, buttonStyle } from '../RegisterClient/Styles/ClientForm.styles';
+import { ClientFormData } from '../RegisterClient/TypesRegister.tsx';
+import { formContainer, buttonGroup, buttonStyle } from "./Styles/ClientForm.styles.ts";
+import React from "react";
 
 const initialForm: ClientFormData = {
   nombres: '',

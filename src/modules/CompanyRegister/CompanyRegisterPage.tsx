@@ -7,7 +7,8 @@ import {
   sectionTitleCompany,
   buttonStyleCompany,
   TitlePrincipalCompany,
-} from '../CompanyRegister/Styles/CompanyRegisterPage.styles';
+} from "./Styles/CompanyRegisterPage.styles.ts";
+import React from "react";
 
 export default function CompanyRegisterPage() {
   const [form, setForm] = useState({

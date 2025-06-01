@@ -1,5 +1,6 @@
 import { TextField, Button } from '@mui/material';
-import { CompanyFormData } from './TypesCompany';
+import { CompanyFormData } from "./TypesCompany.ts";
+import React from "react";
 
 type Props = {
   values: CompanyFormData;
