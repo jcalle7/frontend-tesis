@@ -2,6 +2,7 @@ import { Box, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActio
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import { useState } from 'react';
+import React from 'react';
 
 interface Question {
   id: number;

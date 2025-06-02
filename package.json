@@ -18,15 +18,18 @@
     "@mui/x-data-grid": "^8.2.0",
     "@mui/x-date-pickers": "^8.3.0",
     "@supabase/supabase-js": "^2.49.8",
+    "cors": "^2.8.5",
     "dayjs": "^1.11.13",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.6.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.0.4",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.5",
     "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react-swc": "^3.8.0",
     "eslint": "^9.22.0",
@@ -37,5 +40,18 @@
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.26.1",
     "vite": "^6.3.1"
-  }
+  },
+  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
+  "main": "eslint.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jcalle7/frontend-tesis.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jcalle7/frontend-tesis/issues"
+  },
+  "homepage": "https://github.com/jcalle7/frontend-tesis#readme"
 }

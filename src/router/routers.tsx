@@ -1,14 +1,15 @@
 import { createBrowserRouter } from 'react-router-dom';
-import AdminLayout from '../layouts/AdminLayout';
-import ProtectedRoute from '../router/ProtectedRoute'; 
-import RegisterClientPage from '../modules/RegisterClient/RegisterClientPage';
-import ClientHistoryPage from '../modules/ClientHistory/ClientHistoryPage';
-import ServiceLandingPage from '../modules/ServicesLanding/ServiceLandingPage';
-import AllergyClientPage from '../modules/AllergyForm/AllergyClientPage';
-import AppointmentLandingPage from '../modules/ScheduleAppointment/AppointmentClientPage';
-import AppointmentListPage from '../modules/ViewAppointments/AppoinmentsListPage';
-import LoginPage from '../components/auth/login'; 
-import CompanyRegisterPage from '../modules/CompanyRegister/CompanyRegisterPage';
+import AdminLayout from "../layouts/AdminLayout.tsx";
+import ProtectedRoute from "./ProtectedRoute.tsx"; 
+import RegisterClientPage from "../modules/RegisterClient/RegisterClientPage.tsx";
+import ClientHistoryPage from "../modules/ClientHistory/ClientHistoryPage.tsx";
+import ServiceLandingPage from "../modules/ServicesLanding/ServiceLandingPage.tsx";
+import AllergyClientPage from "../modules/AllergyForm/AllergyClientPage.tsx";
+import AppointmentLandingPage from "../modules/ScheduleAppointment/AppointmentClientPage.tsx";
+import AppointmentListPage from "../modules/ViewAppointments/AppoinmentsListPage.tsx";
+import LoginPage from "../components/auth/login.tsx"; 
+import CompanyRegisterPage from "../modules/CompanyRegister/CompanyRegisterPage.tsx";
+import React from 'react';
 
 
 export const router = createBrowserRouter([
@@ -23,7 +24,7 @@ export const router = createBrowserRouter([
       <AdminLayout />
     </ProtectedRoute>
   ),
-  errorElement: <div style={{ padding: '2rem' }}>Ruta no encontrada 😢</div>, // ← ESTO VA AQUÍ
+  errorElement: <div style={{ padding: '2rem' }}>Ruta no encontrada 😢</div>, 
   children: [
     {
       index: true,

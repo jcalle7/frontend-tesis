@@ -1,11 +1,12 @@
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { Button, Chip } from '@mui/material';
-import { AppointmentData } from '../ViewAppointments/TypesCitas';
+import { AppointmentData } from "./TypesCitas.tsx";
 import {
   actionButtonsContainerAppointments,
   acceptButtonStyleAppointments,
   cancelButtonStyleAppointments,
-} from '../ViewAppointments/Styles/AppointmentTable.styles';
+} from "./Styles/AppointmentTable.styles.ts";
+import React from 'react';
 
 
 interface AppointmentTableProps {

@@ -3,13 +3,14 @@ import {
     GridColDef,
     GridRenderCellParams,
   } from '@mui/x-data-grid';
-import { ClientHistory } from './TypesHistory';
+import { ClientHistory } from "./TypesHistory.tsx";
   interface ClientTableProps {
     rows: ClientHistory[];
   }
 import { IconButton, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useState } from 'react';
+import React from 'react';
 
 
 

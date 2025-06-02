@@ -1,8 +1,9 @@
 import { Box, TextField, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import AppointmentTable from '../ViewAppointments/AppoinmentsTable';
-import { AppointmentData } from '../ViewAppointments/TypesCitas';
+import AppointmentTable from "./AppoinmentsTable.tsx";
+import { AppointmentData } from "./TypesCitas.tsx";
 import { useState } from 'react';
+import React from 'react';
 
 const dummyAppointments: AppointmentData[] = [
   { id: '1', nombre: 'Ana Torres', estado: 'Pendiente', fecha: '15/05/2025', hora: '12:00' },

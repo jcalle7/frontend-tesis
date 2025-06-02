@@ -1,6 +1,7 @@
 import { Typography, Box } from '@mui/material';
-import ServiceForm from '../ServicesLanding/ServiceForm';
-import { containerStylesServices, titleStylesServices } from './Styles/ServiceLandingPage.styles';
+import ServiceForm from "./ServiceForm.tsx";
+import { containerStylesServices, titleStylesServices } from "./Styles/ServiceLandingPage.styles.ts";
+import React from 'react';
 
 export default function ServiceLandingPage() {
   return (

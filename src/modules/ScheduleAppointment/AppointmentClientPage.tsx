@@ -1,6 +1,7 @@
 import { Typography, Box } from '@mui/material';
-import { containerStylesAppoinment, titleStylesAppointment } from './Styles/AppoinmentClientPage.styles';
-import AppointmentForm from './AppointmentForm';
+import { containerStylesAppoinment, titleStylesAppointment } from "./Styles/AppoinmentClientPage.styles.ts";
+import AppointmentForm from "./AppointmentForm.tsx";
+import React from 'react';
 
 export default function AppointmentLandingPage() {
   return (

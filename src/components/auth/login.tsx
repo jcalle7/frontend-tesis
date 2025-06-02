@@ -1,7 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { TextField, Button, Box, Typography, Alert } from '@mui/material';
-import { supabase } from '../lib/supabaseClient';
+import React, { useState } from 'react';
+import {
+  TextField,
+  Button,
+  Box,
+  Typography,
+  Alert,
+} from '@mui/material';
+import { supabase } from "../lib/supabaseClient.ts";
 import { useNavigate } from 'react-router-dom';
+import {
+  containerStyles,
+  alertStyles,
+  buttonStyles,
+  titleStyles,
+  textFieldStyles,
+} from '../auth/StylesLogin/loginStyles.ts';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -9,15 +22,17 @@ export default function Login() {
   const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    supabase
-      .from('clients')
-      .select('*')
-      .then((res) => console.log('🔗 Conexión Supabase OK:', res));
-  }, []);
+  const handleInputChange =
+  (setter: (val: string) => void) =>
+  (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setter(e.target.value);
+
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -29,39 +44,58 @@ export default function Login() {
     }
 
     const role = data.user?.user_metadata?.role;
-    if (role === 'superadmin') {
-      navigate('/');
-    } else {
-      navigate('/');
+
+    switch (role) {
+      case 'superadmin':
+      case 'admin':
+      default:
+        navigate('/');
+        break;
     }
   };
 
   return (
-    <Box sx={{ width: 300, margin: 'auto', mt: 10 }}>
-      <Typography variant="h5" mb={2}>Iniciar sesión</Typography>
-      {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+    <Box sx={containerStyles}>
+      <Typography variant="h4" sx={titleStyles}>
+        Iniciar sesión
+      </Typography>
+
+      {errorMsg && (
+        <Alert severity="error" sx={alertStyles}>
+          {errorMsg}
+        </Alert>
+      )}
+
       <form onSubmit={handleLogin}>
         <TextField
           fullWidth
           label="Correo electrónico"
+          placeholder="Ingresa tu correo electrónico"
           type="email"
-          margin="normal"
+          sx={textFieldStyles}
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={handleInputChange(setEmail)}
         />
+
         <TextField
           fullWidth
           label="Contraseña"
+          placeholder="Ingresa tu contraseña"
           type="password"
-          margin="normal"
+          sx={textFieldStyles}
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={handleInputChange(setPassword)}
         />
-        <Button fullWidth type="submit" variant="contained" sx={{ mt: 2 }}>
+
+        <Button
+          fullWidth
+          type="submit"
+          variant="contained"
+          sx={buttonStyles}
+        >
           Iniciar sesión
         </Button>
       </form>
     </Box>
   );
 }
-

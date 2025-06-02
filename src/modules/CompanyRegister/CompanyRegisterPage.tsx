@@ -42,7 +42,7 @@ export default function CompanyRegisterPage() {
 
     setLoading(true);
 
-    const response = await fetch('https://vmvwijxfuchcehsnchef.functions.supabase.co/register_company_with_admin', {
+    const response = await fetch('https://vmmwiyxfuchcehscnhef.functions.supabase.co/register_company_with_admin', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

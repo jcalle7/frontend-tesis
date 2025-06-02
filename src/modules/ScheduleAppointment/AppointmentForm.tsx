@@ -3,12 +3,13 @@ import { Autocomplete } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { useState } from 'react';
-import { AppointmentFormData } from './TypesAppointment';
-import { formContainerAppointment, buttonGroupAppoinment, buttonStyleAppointment } from '../ScheduleAppointment/Styles/AppointmentForm.styles';
+import { AppointmentFormData } from "./TypesAppointment.tsx";
+import { formContainerAppointment, buttonGroupAppoinment, buttonStyleAppointment } from "./Styles/AppointmentForm.styles.ts";
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs'; 
+import React from 'react';
 
 const mockClientes = [
   { id: 1, nombre: 'María López' },
@@ -34,9 +35,11 @@ export default function AppointmentForm() {
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleDateChange = (newValue: any) => {
+  const handleDateChange = (newValue: Dayjs | null) => {
+    if (newValue) {
     setFormData((prev) => ({ ...prev, fechaHora: newValue.toISOString() }));
-  };
+  }
+};
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +68,7 @@ export default function AppointmentForm() {
 
     const mensaje = `Hola ${formData.cliente}, tu cita para ${formData.servicio} está agendada el ${dayjs(formData.fechaHora).format('DD/MM/YYYY HH:mm')}.`;
     const whatsappURL = `https://wa.me/${telefono.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`;
-    window.open(whatsappURL, '_blank');
+    globalThis.open(whatsappURL, '_blank');
   };
 
   return (

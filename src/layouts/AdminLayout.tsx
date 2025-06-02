@@ -14,7 +14,7 @@ import {
   Typography,
   Button,
 } from '@mui/material';
-import { supabase } from '../components/lib/supabaseClient';
+import { supabase } from "../components/lib/supabaseClient.ts";
 import MenuIcon from '@mui/icons-material/Menu';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import HistoryIcon from '@mui/icons-material/History';
@@ -25,6 +25,7 @@ import EventNoteIcon from '@mui/icons-material/EventNote';
 import BusinessIcon from '@mui/icons-material/Business'; 
 
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import React from 'react';
 
 const drawerWidthExpanded = 230;
 const drawerWidthCollapsed = 70;

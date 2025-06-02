@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { supabase } from '../components/lib/supabaseClient';
+import { supabase } from "../components/lib/supabaseClient.ts";
+import React from 'react';
 
 export default function ProtectedRoute({ children }: React.PropsWithChildren) {
   const [loading, setLoading] = useState(true);

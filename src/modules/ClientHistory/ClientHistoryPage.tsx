@@ -1,7 +1,8 @@
 import { Box, TextField, Typography, Stack } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import ClientTable from '../ClientHistory/ClientTable';
-import { ClientHistory } from '../ClientHistory/TypesHistory'; 
+import ClientTable from "./ClientTable.tsx";
+import { ClientHistory } from "./TypesHistory.tsx"; 
+import React from 'react';
 
 
 const dummyData: ClientHistory[] = [

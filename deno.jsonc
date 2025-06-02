@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"]
+  },
+  "importMap": "./import_map.json",
+  "tasks": {
+    "serve": "supabase functions serve register_company_with_admin",
+    "dev": "deno run --allow-env --allow-net --allow-read ./supabase/functions/register_company_with_admin/index.ts"
+  }
+}
