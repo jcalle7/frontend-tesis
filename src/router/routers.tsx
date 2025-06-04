@@ -10,6 +10,7 @@ import AppointmentListPage from "../modules/ViewAppointments/AppoinmentsListPage
 import LoginPage from "../components/auth/login.tsx"; 
 import CompanyRegisterPage from "../modules/CompanyRegister/CompanyRegisterPage.tsx";
 import React from 'react';
+import ClientListPage from "../modules/RegisterClient/ListarClientes/ClientListPage.tsx";
 
 
 export const router = createBrowserRouter([
@@ -37,6 +38,7 @@ export const router = createBrowserRouter([
     { path: 'agendar', element: <AppointmentLandingPage /> },
     { path: 'ver-cita', element: <AppointmentListPage /> },
     { path: 'register-company', element: <CompanyRegisterPage /> },
+    {path: '/clientes', element: <ClientListPage />}
   ],
 },
 ]);

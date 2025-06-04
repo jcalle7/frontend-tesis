@@ -11,7 +11,8 @@ type Props = {
 export default function CompanyForm({ values, onChange, onSubmit }: Props) {
   return (
     <form onSubmit={onSubmit}>
-      <TextField fullWidth name="name" label="Nombre" value={values.name} onChange={onChange} margin="normal" />
+      <TextField fullWidth name="name" label="Nombre de la empresa" value={values.name} onChange={onChange} margin="normal" />
+      <TextField fullWidth name="Ownername" label="Nombre del titular" value={values.Ownername} onChange={onChange} margin="normal" />
       <TextField fullWidth name="ruc" label="RUC" value={values.ruc} onChange={onChange} margin="normal" />
       <TextField fullWidth name="phone" label="Teléfono" value={values.phone} onChange={onChange} margin="normal" />
       <TextField fullWidth name="email" label="Email" value={values.email} onChange={onChange} margin="normal" />

@@ -13,6 +13,7 @@ import React from "react";
 export default function CompanyRegisterPage() {
   const [form, setForm] = useState({
     name: '',
+    Ownername: '',
     ruc: '',
     phone: '',
     email: '',
@@ -42,7 +43,7 @@ export default function CompanyRegisterPage() {
 
     setLoading(true);
 
-    const response = await fetch('https://vmmwiyxfuchcehscnhef.functions.supabase.co/register_company_with_admin', {
+    const response = await fetch('https://vmmwiyxfuchcehscnhef.supabase.co/functions/v1/register_company_with_admin', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -52,6 +53,7 @@ export default function CompanyRegisterPage() {
       body: JSON.stringify({
         company: {
           name: form.name,
+          Ownername: form.Ownername,
           ruc: form.ruc,
           phone: form.phone,
           email: form.email,
@@ -74,7 +76,7 @@ export default function CompanyRegisterPage() {
 
     setSnackbar({ open: true, message: '✅ Empresa y usuario creados correctamente', severity: 'success' });
     setForm({
-      name: '', ruc: '', phone: '', email: '', address: '',
+      name: '', Ownername: '', ruc: '', phone: '', email: '', address: '',
       adminEmail: '', adminPassword: '',
     });
   };
@@ -85,7 +87,8 @@ export default function CompanyRegisterPage() {
         REGISTRAR EMPRESA
       </Typography>
 
-      <TextField label="Nombre" name="name" value={form.name} onChange={handleChange} />
+      <TextField label="Nombre de la empresa" name="name" value={form.name} onChange={handleChange} />
+      <TextField label="Nombre del titular" name="Ownername" value={form.Ownername} onChange={handleChange} />
       <TextField label="RUC" name="ruc" value={form.ruc} onChange={handleChange} />
       <TextField label="Teléfono" name="phone" value={form.phone} onChange={handleChange} />
       <TextField label="Email de la empresa" name="email" value={form.email} onChange={handleChange} />

@@ -1,5 +1,6 @@
 export interface CompanyFormData {
   name: string;
+  Ownername: string;
   ruc: string;
   phone: string;
   email: string;

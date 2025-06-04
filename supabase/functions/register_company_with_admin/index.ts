@@ -26,6 +26,21 @@ serve(async (req) => {
 
     const supabase = createClient(Deno.env.get("SB_URL")!, Deno.env.get("SB_SERVICE_ROLE")!);
 
+    const { data: existing, error: dupError } = await supabase
+      .from("companies")
+      .select("id")
+      .or(`ruc.eq.${company.ruc},email.eq.${company.email}`)
+      .limit(1);
+
+    if (dupError) throw dupError;
+
+    if (existing && existing.length > 0) {
+      return new Response(JSON.stringify({ error: "❌ Ya existe una empresa con ese RUC o email." }), {
+        status: 409,
+        headers: corsHeaders
+      });
+    }
+    
     console.log("Creando usuario con confirmación automática");
     const { data: userData, error: userError  } = await supabase.auth.admin.createUser({
       email: admin.email,
@@ -61,7 +76,13 @@ await supabase.auth.admin.updateUserById(
 
     const { data: companyData, error: companyError } = await supabase
       .from("companies")
-      .insert([company])
+      .insert([{        
+        name: company.name,
+        owner_name: company.Ownername,
+        ruc: company.ruc,
+        phone: company.phone,
+        email: company.email,
+        address: company.address,}])
       .select()
       .single();
 

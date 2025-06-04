@@ -16,7 +16,6 @@ export const buttonGroup: SxProps = {
 };
 
 export const buttonStyle: SxProps = {
-  minWidth: 130,
   paddingX: 2,
   paddingY: 1,
 };
