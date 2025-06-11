@@ -1,15 +1,42 @@
-import { Typography, Box } from '@mui/material';
-import AllergyFormData from "./AllergyForm.tsx";
-import { containerStylesAllergy, titleStylesAllergy } from "./Styles/AllergyClientPage.styles.ts";
-import React from 'react';
+import { Typography, Box, Button } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import React, { useState } from 'react';
+import DynamicAllergyForm from "../AllergyForm/DynamicAllergyForm.tsx";
+import FormsTable from "../AllergyForm/ListarFormularios/FormsTable.tsx";
+import { containerStylesAllergy, titleStylesAllergy } from "../AllergyForm/Styles/AllergyClientPage.styles.ts";
 
 export default function AllergyClientPage() {
+  const [openCreate, setOpenCreate] = useState(false);
+  const [refresh, setRefresh] = useState(false);
+
+  const handleAfterSave = () => {
+    setOpenCreate(false);
+    setRefresh(r => !r); // Esto forzará el refresh en la tabla
+  };
+
   return (
-    <Box sx={ containerStylesAllergy }>
+    <Box sx={containerStylesAllergy}>
       <Typography variant="h4" sx={titleStylesAllergy}>
-        CREAR FORMULARIOS
+        FORMULARIOS
       </Typography>
-      <AllergyFormData />
+      <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
+        <Button
+          variant="contained"
+          color="success"
+          startIcon={<AddIcon />}
+          onClick={() => setOpenCreate(true)}
+        >
+          AÑADIR FORMULARIO
+        </Button>
+      </Box>
+      {/* Modal de creación */}
+      <DynamicAllergyForm
+        open={openCreate}
+        onClose={() => setOpenCreate(false)}
+        onAfterSave={handleAfterSave}
+      />
+      {/* Tabla de formularios, con prop para refrescar al crear/editar */}
+      <FormsTable refresh={refresh} />
     </Box>
   );
 }

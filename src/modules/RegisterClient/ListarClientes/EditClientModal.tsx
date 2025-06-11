@@ -64,8 +64,8 @@ export default function EditClientModal({
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} color="error">Cancelar</Button>
-        <Button onClick={handleUpdate} color="primary" variant="contained">Guardar</Button>
+        <Button onClick={handleClose} color="error" variant="outlined" >Cancelar</Button>
+        <Button onClick={handleUpdate} color="success" variant="contained">Guardar</Button>
       </DialogActions>
     </Dialog>
   );

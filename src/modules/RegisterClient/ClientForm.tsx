@@ -86,11 +86,8 @@ export default function ClientForm() {
         <Button type="submit" variant="contained" color="success" size="large" startIcon={<SaveIcon />} sx={buttonStyle}>
           GUARDAR
         </Button>
-        <Button variant="outlined" color="error" size="large" sx={buttonStyle}>
-          CANCELAR
-        </Button>
         <Button variant="contained" color="primary" size="large" startIcon={<ListIcon />} sx={buttonStyle} onClick={() => navigate('/clientes')}>
-          LISTAR
+          LISTAR CLIENTES
         </Button>
       </Box>
 
