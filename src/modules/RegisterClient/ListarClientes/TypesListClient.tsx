@@ -6,4 +6,5 @@ export type Client = {
   email: string;
   comments?: string;
   company_id: string;
+  password_hash?: string;  // ahora opcional, para no romper lecturas
 };

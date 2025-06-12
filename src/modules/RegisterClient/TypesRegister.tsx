@@ -3,6 +3,8 @@ export interface ClientFormData {
     apellidos: string;
     telefono: string;
     correo: string;
+    password: string;
+    confirmPassword: string;
     comentarios?: string;
   }
   

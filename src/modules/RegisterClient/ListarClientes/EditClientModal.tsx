@@ -3,8 +3,11 @@ import {
   Button, TextField, Stack
 } from '@mui/material';
 import { useState, useEffect } from 'react';
+import bcrypt from 'bcryptjs';
 import { supabase } from '../../../components/lib/supabaseClient.ts';
 import React from "react";
+import { InputAdornment, IconButton } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { Client } from './TypesListClient.tsx'; 
 
 type EditClientModalProps = {
@@ -21,9 +24,15 @@ export default function EditClientModal({
   onSave
 }: EditClientModalProps) {
   const [form, setForm] = useState<Client>(client);
+  const [newPassword, setNewPassword] = useState<string>('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+  const [confirmNewPassword, setConfirmNewPassword] = useState<string>('');
 
   useEffect(() => {
     setForm(client); 
+    setNewPassword('');
+    setConfirmNewPassword('');
   }, [client]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,22 +41,38 @@ export default function EditClientModal({
   };
 
   const handleUpdate = async () => {
-    const { error } = await supabase
+    const updatePayload: Partial<Client> = {
+      first_name: form.first_name,
+      last_name: form.last_name,
+      phone: form.phone,
+      email: form.email,
+      comments: form.comments,
+    };
+      
+      if (newPassword || confirmNewPassword) {
+        if (newPassword.length < 8) {
+          alert('La nueva contraseña debe tener al menos 8 caracteres.');
+          return;
+      }
+      if (newPassword !== confirmNewPassword) {
+        alert('Las nuevas contraseñas no coinciden.');
+        return;
+      }
+      const salt = bcrypt.genSaltSync(10);
+      updatePayload.password_hash = bcrypt.hashSync(newPassword, salt);
+    }
+
+    const { error:updateError } = await supabase
       .from('clients')
-      .update({
-        first_name: form.first_name,
-        last_name: form.last_name,
-        phone: form.phone,
-        email: form.email,
-        comments: form.comments,
-      })
+      .update(updatePayload)
       .eq('id', form.id);
 
-    if (!error) {
-      onSave(); // recarga clientes
-      handleClose();
+    if (updateError) {
+      console.error(updateError);
+      alert('❌ Error al actualizar el cliente.');
     } else {
-      alert('Error al actualizar');
+      onSave();
+      handleClose();
     }
   };
 
@@ -61,6 +86,66 @@ export default function EditClientModal({
           <TextField label="Teléfono" name="phone" value={form.phone} onChange={handleChange} fullWidth />
           <TextField label="Correo" name="email" value={form.email} onChange={handleChange} fullWidth />
           <TextField label="Comentarios" name="comments" value={form.comments || ''} onChange={handleChange} fullWidth multiline />
+          <TextField
+            label="Nueva Contraseña"
+            type={showNewPassword ? 'text' : 'password'}
+            value={newPassword}
+            onChange={e => setNewPassword(e.target.value)}
+            fullWidth
+            error={newPassword.length > 0 && newPassword.length < 8}
+            helperText={
+            newPassword.length > 0 && newPassword.length < 8
+            ? 'Mínimo 8 caracteres'
+            : 'Deja vacío para no cambiar'
+          }
+            slotProps={{
+              input: {
+            endAdornment: (
+            <InputAdornment position="end">
+            <IconButton
+            onClick={() => setShowNewPassword(!showNewPassword)}
+            edge="end"
+            size="small"
+          >
+          {showNewPassword ? <VisibilityOff /> : <Visibility />}
+          </IconButton>
+          </InputAdornment>
+          ),
+          }
+          }}
+          />
+          <TextField
+          label="Confirmar Contraseña"
+          type={showConfirmNewPassword ? 'text' : 'password'}
+          value={confirmNewPassword}
+          onChange={e => setConfirmNewPassword(e.target.value)}
+          fullWidth
+          error={
+            confirmNewPassword.length > 0 &&
+            confirmNewPassword !== newPassword
+          }
+          helperText={
+          confirmNewPassword.length > 0 &&
+          confirmNewPassword !== newPassword
+          ? 'Debe coincidir con la nueva contraseña'
+          : 'Repite la nueva contraseña'
+          }
+          slotProps={{
+          input: {
+          endAdornment: (
+          <InputAdornment position="end">
+          <IconButton
+          onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
+          edge="end"
+          size="small"
+          >
+          {showConfirmNewPassword ? <VisibilityOff /> : <Visibility />}
+          </IconButton>
+          </InputAdornment>
+          ), 
+          }
+          }}
+        />
         </Stack>
       </DialogContent>
       <DialogActions>
