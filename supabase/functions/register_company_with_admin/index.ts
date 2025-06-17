@@ -78,6 +78,7 @@ await supabase.auth.admin.updateUserById(
       .from("companies")
       .insert([{        
         name: company.name,
+        slug: company.slug, 
         owner_name: company.Ownername,
         ruc: company.ruc,
         phone: company.phone,

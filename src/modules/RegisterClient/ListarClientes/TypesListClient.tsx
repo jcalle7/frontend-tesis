@@ -7,4 +7,6 @@ export type Client = {
   comments?: string;
   company_id: string;
   password_hash?: string;  // ahora opcional, para no romper lecturas
+  role_id?: string; // ⬅️ solo lectura interna, no editable desde UI
+
 };

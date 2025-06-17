@@ -5,16 +5,36 @@ import React from 'react';
 
 export default function ProtectedRoute({ children }: React.PropsWithChildren) {
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAllowed, setIsAllowed] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setIsAuthenticated(!!data.session);
+    const verifyAccess = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return setLoading(false); // No autenticado
+
+      const userId = session.user.id;
+
+      // Buscar el rol del usuario en la tabla company_users
+      const { data: companyUser, error } = await supabase
+        .from('company_users')
+        .select('role')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (error || !companyUser) {
+        setIsAllowed(false);
+      } else {
+        // Solo se permite acceso si es admin o empresa
+        setIsAllowed(companyUser.role === 'admin' || companyUser.role === 'empresa');
+      }
+
       setLoading(false);
-    });
+    };
+
+    verifyAccess();
   }, []);
 
   if (loading) return null;
 
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+  return isAllowed ? <>{children}</> : <Navigate to="/login-cliente" />;
 }

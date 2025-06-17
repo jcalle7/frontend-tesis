@@ -13,12 +13,30 @@ import React from 'react';
 import ClientListPage from "../modules/RegisterClient/ListarClientes/ClientListPage.tsx";
 import FormPreview from "../modules/AllergyForm/ListarFormularios/FormsPreview.tsx";
 import FormsTable from "../modules/AllergyForm/ListarFormularios/FormsTable.tsx";
-
+import CompanyLandingPage from '../modules/ServicesLanding/pages/CompanyLandingPage.tsx';
+import RedirectClientToSlugLanding from '../modules/ServicesLanding/pages/RedirectClientToSlugLanding.tsx';
+import LoginClientPage from '../components/Pages/loginClientPage.tsx'; 
 
 export const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />, 
+  },
+  {
+    path: '/empresa/:slug',
+    element: <CompanyLandingPage />, // Ruta pública de landing
+  },
+  {
+  path: '/mi-empresa',
+  element: <RedirectClientToSlugLanding />
+  },
+  {
+  path: '/login-cliente',
+  element: <LoginClientPage />, 
+  },
+  {
+  path: '/mi-empresa',
+  element: <RedirectClientToSlugLanding />
   },
   {
   path: '/',

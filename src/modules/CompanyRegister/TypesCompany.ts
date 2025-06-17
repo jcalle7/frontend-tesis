@@ -5,4 +5,6 @@ export interface CompanyFormData {
   phone: string;
   email: string;
   address: string;
+  slug: string; 
+
 }

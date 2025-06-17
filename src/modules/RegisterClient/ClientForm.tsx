@@ -2,7 +2,7 @@ import { Alert, Box, Button, Snackbar, TextField } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import ListIcon from '@mui/icons-material/List';
 import { useState, useEffect } from 'react';
-import bcrypt from 'bcryptjs';
+import _bcrypt from 'bcryptjs';
 import { ClientFormData } from '../RegisterClient/TypesRegister.tsx';
 import { formContainer, buttonGroup, buttonStyle } from "./Styles/ClientForm.styles.ts";
 import { supabase } from "../../components/lib/supabaseClient.ts";
@@ -50,46 +50,64 @@ export default function ClientForm() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    // 1) Validaciones de contraseña
-    if (formData.password.length < 8) {
-      setSnackbar({ open: true, message: '❌ La contraseña debe tener al menos 8 caracteres.', severity: 'error' });
+  if (formData.password.length < 8) {
+    setSnackbar({ open: true, message: '❌ La contraseña debe tener al menos 8 caracteres.', severity: 'error' });
+    return;
+  }
+
+  if (formData.password !== formData.confirmPassword) {
+    setSnackbar({ open: true, message: '❌ Las contraseñas no coinciden.', severity: 'error' });
+    return;
+  }
+
+  if (!companyId) {
+    setSnackbar({ open: true, message: '⚠️ No se pudo asociar cliente a una empresa.', severity: 'error' });
+    return;
+  }
+
+  try {
+        //Obtener el token del usuario logueado
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token;
+
+    if (!token) {
+      setSnackbar({ open: true, message: '⚠️ Debes iniciar sesión para registrar un cliente.', severity: 'error' });
       return;
     }
-    if (formData.password !== formData.confirmPassword) {
-      setSnackbar({ open: true, message: '❌ Las contraseñas no coinciden.', severity: 'error' });
-      return;
-    }
 
-    if (!companyId) {
-      setSnackbar({ open: true, message: '⚠️ No se pudo asociar cliente a una empresa.', severity: 'error' });
-      return;
-    }
+    const response = await fetch('https://vmmwiyxfuchcehscnhef.supabase.co/functions/v1/register_client_with_auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({
+        client: {
+          first_name: formData.nombres,
+          last_name: formData.apellidos,
+          phone: formData.telefono,
+          email: formData.correo,
+          comments: formData.comentarios || '',
+          company_id: companyId,
+        },
+        password: formData.password
+      })
+    });
 
-    // 2) Hash de la contraseña
-    const salt = bcrypt.genSaltSync(10);
-    const passwordHash = bcrypt.hashSync(formData.password, salt);
+    const result = await response.json();
 
-    // 3) Inserción en Supabase
-    const { error } = await supabase.from('clients').insert([{
-      first_name: formData.nombres,
-      last_name: formData.apellidos,
-      phone: formData.telefono,
-      email: formData.correo,
-      comments: formData.comentarios || '',
-      password_hash: passwordHash,
-      company_id: companyId
-    }]);
-
-    if (error) {
-      setSnackbar({ open: true, message: '❌ Error al guardar el cliente.', severity: 'error' });
+    if (!response.ok) {
+      
+      setSnackbar({ open: true, message: '❌ ' + (result?.error || 'Error desconocido'), severity: 'error' });
     } else {
-      setSnackbar({ open: true, message: '✅ Cliente guardado con éxito', severity: 'success' });
+      setSnackbar({ open: true, message: '✅ Cliente registrado correctamente', severity: 'success' });
       setFormData(initialForm);
     }
-  };
+  } catch (error) {
+    setSnackbar({ open: true, message: '❌ Error inesperado.', severity: 'error' });
+    console.error(error);
+  }
+};
 
   return (
     <Box component="form" onSubmit={handleSubmit} sx={formContainer}>

@@ -22,6 +22,14 @@ export default function CompanyRegisterPage() {
     adminPassword: '',
   });
 
+  const generateSlug = (name: string) =>
+  name
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '') // quitar símbolos
+    .replace(/\s+/g, '-')     // espacios a guiones
+    .replace(/-+/g, '-');     // quitar guiones duplicados
+
   const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
@@ -43,12 +51,14 @@ export default function CompanyRegisterPage() {
 
     setLoading(true);
 
+    const slug = generateSlug(form.name); // genera el slug
+
     const response = await fetch('https://vmmwiyxfuchcehscnhef.supabase.co/functions/v1/register_company_with_admin', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // Optional: Puedes enviar un token aquí si luego quieres seguridad extra
-        // 'x-admin-token': 'TU_TOKEN_INTERNO_SECRETO'
+        // Optional: Se Puede enviar un token aquí si luego se quiere seguridad extra
+        // 'x-admin-token': 'TOKEN_INTERNO_SECRETO'
       },
       body: JSON.stringify({
         company: {
@@ -58,6 +68,8 @@ export default function CompanyRegisterPage() {
           phone: form.phone,
           email: form.email,
           address: form.address,
+          slug: slug, // usa el slug generado
+
         },
         admin: {
           email: form.adminEmail,
