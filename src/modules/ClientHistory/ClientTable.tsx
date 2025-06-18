@@ -34,11 +34,15 @@
           field: 'servicios',
           headerName: 'Servicios realizados',
           flex: 1.5,
-          valueGetter: (params: { row: ClientHistory }) => {
-              const servicios = params.row?.servicios;
-              return Array.isArray(servicios) ? servicios.join(', ') : '';
-            },
+          renderCell: (params: GridRenderCellParams) => {
+            const servicios = params.row?.servicios;
+            if (Array.isArray(servicios) && servicios.length > 0) {
+            return servicios.join(', ');
+          }
+          return '—';  
         },
+
+      },
         {
           field: 'alertaSalud',
           headerName: 'Alertas de salud',

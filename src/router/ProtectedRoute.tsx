@@ -24,8 +24,8 @@ export default function ProtectedRoute({ children }: React.PropsWithChildren) {
       if (error || !companyUser) {
         setIsAllowed(false);
       } else {
-        // Solo se permite acceso si es admin o empresa
-        setIsAllowed(companyUser.role === 'admin' || companyUser.role === 'empresa');
+        // Solo se permite acceso si es superadmin, admin o empresa
+        setIsAllowed(companyUser.role === 'admin' || companyUser.role === 'empresa' || companyUser.role === 'superadmin');
       }
 
       setLoading(false);

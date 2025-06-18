@@ -42,15 +42,19 @@ export default function AppointmentForm() {
         .single();
         console.log('🔍 Resultado de consulta a company_users:', empresaData);
 
-
       if (empresaData?.company_id) {
-        setCompanyId(empresaData.company_id);
+        const companyId = empresaData.company_id;
+      setCompanyId(companyId);
       } else {
-        setSnackbar({ open: true, message: '⚠️ No se encontró la empresa asociada.', severity: 'error' });
-      }
+      setSnackbar({ open: true, message: '⚠️ No se encontró la empresa asociada.', severity: 'error' });
+      return;
+    }
+    
+    if (!empresaData) return;
+
 
       const { data: clientesData } = await supabase.from('clients').select('*');
-      const { data: serviciosData } = await supabase.from('services').select('*');
+      const { data: serviciosData } = await supabase.from('services').select('*').eq('company_id', empresaData.company_id);
       setClientes(clientesData || []);
       setServicios(serviciosData || []);
       setCargandoDatos(false);
