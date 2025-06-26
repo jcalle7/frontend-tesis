@@ -4,4 +4,6 @@ export interface AppointmentData {
   estado: 'Aceptada' | 'Pendiente' | 'Cancelada';
   fecha: string;
   hora: string;
+  telefono?: string; // necesario para WhatsApp
+  clientId: string;
 }

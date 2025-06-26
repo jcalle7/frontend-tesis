@@ -1,16 +1,29 @@
-import React, { useState } from 'react';
-import { Box, Button, Snackbar, Alert, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Slide, Typography } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  Button,
+  Snackbar,
+  Alert,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Slide,
+  Typography,
+} from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import SaveIcon from '@mui/icons-material/Save';
 import { GridPaginationModel } from '@mui/x-data-grid';
 import ServiceFormModal from '../../ServicesLanding/ServiceFormModal.tsx';
 import ServiceTable from '../../ServicesLanding/ServiceTable.tsx';
 import { ServiceData, useServices } from '../../ServicesLanding/hooks/useServices.ts';
 import { TransitionProps } from '@mui/material/transitions';
-import { ReactElement } from 'react';
 import { containerStylesServices, titleStylesServices } from '../../ServicesLanding/Styles/ServiceLandingPage.styles.ts';
+import LandingForm from '../../ServicesLanding/LandingForm.tsx';
+import { supabase } from '../../../components/lib/supabaseClient.ts';
 
-
-const Transition = React.forwardRef<HTMLDivElement, TransitionProps & { children: ReactElement }>(
+const Transition = React.forwardRef<HTMLDivElement, TransitionProps & { children: React.ReactElement }>(
   function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
   }
@@ -19,22 +32,156 @@ const Transition = React.forwardRef<HTMLDivElement, TransitionProps & { children
 export default function ServiceManager() {
   const { services, createOrUpdateService, deleteService } = useServices();
 
+  // Estados para servicios
   const [formOpen, setFormOpen] = useState(false);
   const [formData, setFormData] = useState<Omit<ServiceData, 'id'>>({
-  nombre: '',
-  precio: '',
-  duracion: '',
-  descripcion: '',
-  imagen: '',
-});
+    nombre: '',
+    precio: '',
+    duracion: '',
+    descripcion: '',
+    imagen: '',
+  });
   const [editingId, setEditingId] = useState<number | null>(null);
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 5 });
-  const [snackbar, setSnackbar] = useState<{ 
-  open: boolean; 
-  message: string; 
-  severity: 'success' | 'error' 
-}>({ open: false, message: '', severity: 'success' });
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+
+  // Estados para configuración de landing
+  const [landingForm, setLandingForm] = useState({
+    cover_url: '',
+    title: '',
+    facebook_url: '',
+    instagram_url: '',
+    tiktok_url: '',
+  });
+  const [initialLanding, setInitialLanding] = useState<typeof landingForm | null>(null);
+  const [companyId, setCompanyId] = useState<string | null>(null);
+  const [companySlug, setCompanySlug] = useState<string | null>(null);
+  const [companyName, setCompanyName] = useState<string>('');
+
+  const fetchLandingData = async () => {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user?.user?.id) return;
+
+    const { data: companyData } = await supabase
+      .from('company_users')
+      .select('company_id')
+      .eq('user_id', user.user.id)
+      .single();
+
+    if (!companyData?.company_id) return;
+
+    setCompanyId(companyData.company_id);
+
+    if (companyData.company_id) {
+    console.log("company_id desde company_users:", companyData.company_id);
+    const { data: companyDetails, error: slugError } = await supabase
+    .from('companies')
+    .select('id, slug, name')
+    .eq('id', companyData.company_id)
+    .maybeSingle();
+
+    if (companyDetails?.slug) {
+    setCompanySlug(companyDetails.slug);
+    }
+    setCompanyName(companyDetails?.name || '');
+
+    if (slugError) {
+      console.error('❌ Error obteniendo slug:', slugError.message);
+    }
+
+    if (companyDetails?.slug) {
+      setCompanySlug(companyDetails.slug);
+
+      console.log('✅ Slug de la empresa:', companyDetails.slug);
+    } else {
+      console.warn('⚠️ La empresa no tiene slug registrado en Supabase.');
+    }
+};
+
+    const { data: existingLanding } = await supabase
+      .from('landing_data')
+      .select('*')
+      .eq('company_id', companyData.company_id)
+      .maybeSingle();
+
+    if (existingLanding) {
+      setLandingForm({
+        cover_url: existingLanding.cover_url ?? '',
+        title: existingLanding.title ?? '',
+        facebook_url: existingLanding.facebook_url ?? '',
+        instagram_url: existingLanding.instagram_url ?? '',
+        tiktok_url: existingLanding.tiktok_url ?? '',
+      });
+
+      setInitialLanding({
+      cover_url: existingLanding.cover_url ?? '',
+      title: existingLanding.title ?? '',
+      facebook_url: existingLanding.facebook_url ?? '',
+      instagram_url: existingLanding.instagram_url ?? '',
+      tiktok_url: existingLanding.tiktok_url ?? '',
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchLandingData();
+  }, []);
+
+  const handleLandingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+  setLandingForm((prev) => ({ ...prev, [name]: value }));
+  const hasChanges = JSON.stringify(landingForm) !== JSON.stringify(initialLanding);
+  };
+
+  const handleLandingImageChange = async (file: File) => {
+    const filePath = `portadas/${Date.now()}-${file.name}`;
+    const { error } = await supabase.storage.from('imagenes').upload(filePath, file);
+    if (error) {
+      setSnackbar({ open: true, message: '❌ Error subiendo imagen.', severity: 'error' });
+      return;
+    }
+    const { data } = supabase.storage.from('imagenes').getPublicUrl(filePath);
+    setLandingForm((prev) => ({ ...prev, cover_url: data.publicUrl }));
+  };
+
+  const handleLandingSubmit = async () => {
+    if (!companyId) return;
+
+    const { data: existing } = await supabase
+      .from('landing_data')
+      .select('id')
+      .eq('company_id', companyId)
+      .single();
+
+    if (existing) {
+      const { error } = await supabase
+        .from('landing_data')
+        .update({ ...landingForm })
+        .eq('company_id', companyId);
+
+      if (error) {
+        setSnackbar({ open: true, message: '❌ Error actualizando landing.', severity: 'error' });
+      } else {
+        setSnackbar({ open: true, message: `✅ Se actualizó la landing de ${companyName} correctamente.`, severity: 'success' });
+        setInitialLanding({ ...landingForm });
+      }
+    } else {
+      const { error } = await supabase.from('landing_data').insert([{ company_id: companyId, ...landingForm }]);
+
+      if (error) {
+        setSnackbar({ open: true, message: '❌ Error creando landing.', severity: 'error' });
+      } else {
+        setSnackbar({ open: true, message: '✅ Landing creada.', severity: 'success' });
+        setInitialLanding({ ...landingForm });
+      }
+    }
+  };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, files } = e.target;
@@ -56,7 +203,7 @@ export default function ServiceManager() {
       setEditingId(null);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
-    setSnackbar({ open: true, message, severity: 'error' });
+      setSnackbar({ open: true, message, severity: 'error' });
     }
   };
 
@@ -77,13 +224,14 @@ export default function ServiceManager() {
     try {
       await deleteService(confirmDeleteId);
       setSnackbar({ open: true, message: '✅ Servicio eliminado.', severity: 'success' });
-      } catch (err) {
+    } catch (err) {
       const message = err instanceof Error ? err.message : '❌ Error al eliminar.';
       setSnackbar({ open: true, message, severity: 'error' });
-      } finally {
+    } finally {
       setConfirmDeleteId(null);
     }
   };
+  const hasChanges = initialLanding !== null && JSON.stringify(landingForm) !== JSON.stringify(initialLanding);
 
   return (
     <Box sx={containerStylesServices}>
@@ -111,12 +259,38 @@ export default function ServiceManager() {
         onPaginationModelChange={setPaginationModel}
       />
 
+      <LandingForm
+        formData={landingForm}
+        onChange={handleLandingChange}
+        onImageChange={handleLandingImageChange}
+        onSubmit={handleLandingSubmit}
+        disabled={!hasChanges}
+      />
+
+      {companySlug && (
+      <Box mt={3} display="flex" justifyContent="center">
+      <Button
+      variant="outlined"
+      color="info"
+      size="large"
+      startIcon={<VisibilityIcon />}
+      onClick={() => window.open(`/empresa/${companySlug}`, '_blank')}
+      sx={{
+        textTransform: 'none',
+        fontWeight: 500,
+        px: 3,
+        borderRadius: 2,
+      }}
+      >
+      Ver mi landing
+      </Button>
+      </Box>
+    )}
+
       <Dialog open={confirmDeleteId !== null} TransitionComponent={Transition} keepMounted onClose={() => setConfirmDeleteId(null)}>
         <DialogTitle>¿Seguro que quieres eliminar este servicio?</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Esta acción no se puede deshacer. ¿Deseas continuar?
-          </DialogContentText>
+          <DialogContentText>Esta acción no se puede deshacer. ¿Deseas continuar?</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConfirmDeleteId(null)}>Cancelar</Button>
@@ -124,8 +298,8 @@ export default function ServiceManager() {
         </DialogActions>
       </Dialog>
 
-      <Snackbar open={snackbar.open} autoHideDuration={5000} onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}>
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} sx={{ width: '100%' }}>
+      <Snackbar open={snackbar.open} autoHideDuration={5000} onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}>
+        <Alert severity={snackbar.severity} onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))} sx={{ width: '100%' }}>
           {snackbar.message}
         </Alert>
       </Snackbar>

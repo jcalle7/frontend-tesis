@@ -16,6 +16,8 @@ import FormsTable from "../modules/AllergyForm/ListarFormularios/FormsTable.tsx"
 import CompanyLandingPage from '../modules/ServicesLanding/pages/CompanyLandingPage.tsx';
 import RedirectClientToSlugLanding from '../modules/ServicesLanding/pages/RedirectClientToSlugLanding.tsx';
 import LoginClientPage from '../components/Pages/loginClientPage.tsx'; 
+import FillFormPage from '../modules/ViewAppointments/FillFormPage';
+import FormSubmissionsTable from "../modules/ViewAppointments/FormSubmissionsTable";
 
 export const router = createBrowserRouter([
   {
@@ -33,6 +35,14 @@ export const router = createBrowserRouter([
   {
   path: '/login-cliente',
   element: <LoginClientPage />, 
+  },
+  {
+  path: '/formularios/llenar/:formId/:clientId',
+  element: <FillFormPage />,
+  },
+  { 
+  path: 'formularios/enviados', 
+  element: <FormSubmissionsTable /> 
   },
   {
   path: '/mi-empresa',
