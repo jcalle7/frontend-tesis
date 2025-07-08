@@ -57,6 +57,10 @@ export default function ServiceManager() {
     facebook_url: '',
     instagram_url: '',
     tiktok_url: '',
+    phone: '',
+    address: '',
+    email: '',
+    bank_account: ''
   });
   const [initialLanding, setInitialLanding] = useState<typeof landingForm | null>(null);
   const [companyId, setCompanyId] = useState<string | null>(null);
@@ -110,21 +114,20 @@ export default function ServiceManager() {
       .maybeSingle();
 
     if (existingLanding) {
-      setLandingForm({
+      const fullLanding = {
         cover_url: existingLanding.cover_url ?? '',
         title: existingLanding.title ?? '',
         facebook_url: existingLanding.facebook_url ?? '',
         instagram_url: existingLanding.instagram_url ?? '',
         tiktok_url: existingLanding.tiktok_url ?? '',
-      });
+        phone: existingLanding.phone ?? '',
+        address: existingLanding.address ?? '',
+        email: existingLanding.email ?? '',
+        bank_account: existingLanding.bank_account ?? ''
+    };
 
-      setInitialLanding({
-      cover_url: existingLanding.cover_url ?? '',
-      title: existingLanding.title ?? '',
-      facebook_url: existingLanding.facebook_url ?? '',
-      instagram_url: existingLanding.instagram_url ?? '',
-      tiktok_url: existingLanding.tiktok_url ?? '',
-      });
+    setLandingForm(fullLanding);
+    setInitialLanding(fullLanding);
     }
   };
 
@@ -150,38 +153,52 @@ export default function ServiceManager() {
     setLandingForm((prev) => ({ ...prev, cover_url: data.publicUrl }));
   };
 
-  const handleLandingSubmit = async () => {
-    if (!companyId) return;
+const handleLandingSubmit = async () => {
+  if (!companyId) return;
 
-    const { data: existing } = await supabase
-      .from('landing_data')
-      .select('id')
-      .eq('company_id', companyId)
-      .single();
+  const { data: existing } = await supabase
+    .from('landing_data')
+    .select('id')
+    .eq('company_id', companyId)
+    .single();
 
-    if (existing) {
-      const { error } = await supabase
-        .from('landing_data')
-        .update({ ...landingForm })
-        .eq('company_id', companyId);
-
-      if (error) {
-        setSnackbar({ open: true, message: '❌ Error actualizando landing.', severity: 'error' });
-      } else {
-        setSnackbar({ open: true, message: `✅ Se actualizó la landing de ${companyName} correctamente.`, severity: 'success' });
-        setInitialLanding({ ...landingForm });
-      }
-    } else {
-      const { error } = await supabase.from('landing_data').insert([{ company_id: companyId, ...landingForm }]);
-
-      if (error) {
-        setSnackbar({ open: true, message: '❌ Error creando landing.', severity: 'error' });
-      } else {
-        setSnackbar({ open: true, message: '✅ Landing creada.', severity: 'success' });
-        setInitialLanding({ ...landingForm });
-      }
-    }
+  const cleanedLanding = {
+    cover_url: landingForm.cover_url,
+    title: landingForm.title,
+    facebook_url: landingForm.facebook_url,
+    instagram_url: landingForm.instagram_url,
+    tiktok_url: landingForm.tiktok_url,
+    phone: landingForm.phone,
+    address: landingForm.address,
+    email: landingForm.email,
+    bank_account: landingForm.bank_account
   };
+
+  if (existing) {
+    const { error: updateError } = await supabase
+      .from('landing_data')
+      .update(cleanedLanding)
+      .eq('company_id', companyId);
+
+    if (updateError) {
+      setSnackbar({ open: true, message: '❌ Error actualizando landing.', severity: 'error' });
+    } else {
+      setSnackbar({ open: true, message: `✅ Se actualizó la landing de ${companyName} correctamente.`, severity: 'success' });
+      setInitialLanding({ ...landingForm });
+    }
+  } else {
+    const { error: insertError } = await supabase
+      .from('landing_data')
+      .insert([{ company_id: companyId, ...cleanedLanding }]);
+
+    if (insertError) {
+      setSnackbar({ open: true, message: '❌ Error creando landing.', severity: 'error' });
+    } else {
+      setSnackbar({ open: true, message: '✅ Landing creada.', severity: 'success' });
+      setInitialLanding({ ...landingForm });
+    }
+  }
+};
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, files } = e.target;
