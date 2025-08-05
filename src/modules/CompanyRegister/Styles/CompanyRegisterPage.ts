@@ -6,23 +6,24 @@ export const formContainerCompany: SxProps = {
   display: 'flex',
   flexDirection: 'column',
   gap: 2,
-  mt: 11,
+  mt: 9,
   px: 6,
-  fontWeight: 'bold',
 };
 
 export const TitlePrincipalCompany: SxProps = {
-mt: 2,
-fontWeight: 'bold',
-}
+  fontWeight: 'bold',
+  mb: 2,
+};
 
 export const sectionTitleCompany: SxProps = {
   mt: 4,
+  mb: 1,
   fontWeight: 'bold',
+  color: '#444',
 };
 
 export const buttonStyleCompany: SxProps = {
-  alignSelf: 'flex-start',
-  minWidth: 130,
-  mt: 2,
+  minWidth: 150,
+  py: 1,
+  px: 2,
 };

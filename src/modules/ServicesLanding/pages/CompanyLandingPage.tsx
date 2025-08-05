@@ -1,17 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../../../components/lib/supabaseClient.ts';
+import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+import { Button } from '@mui/material';
 import { FaFacebook, FaInstagram, FaTiktok } from 'react-icons/fa';
 import { Phone, Email, LocationOn } from '@mui/icons-material';
-import ServiceCardFlip from '../../ServicesLanding/pages/ServiceCardFlip';
+import ServiceCardFlip from '../../ServicesLanding/componentsLanding/ServiceCardFlip';
 import '../../../modules/ServicesLanding/pages/landingStyles/landingStyles.css';
+import Cart from '../componentsLanding/Cart'
 
 export default function CompanyLandingPage() {
   const { slug } = useParams();
   const [empresaNombre, setEmpresaNombre] = useState('');
   const [landingData, setLandingData] = useState(null);
   const [servicios, setServicios] = useState([]);
-  const [selectedServicio, setSelectedServicio] = useState(null);
+  const [selectedServicios, setSelectedServicios] = useState<any[]>([]);
   const [fecha, setFecha] = useState('');
   const [comprobante, setComprobante] = useState<File | null>(null);
   const [carrito, setCarrito] = useState([]);
@@ -54,7 +59,7 @@ export default function CompanyLandingPage() {
   }, [slug]);
 
   const handleAgendarTurno = async () => {
-    if (!selectedServicio || !fecha || !comprobante) {
+    if (!selectedServicios || !fecha || !comprobante) {
       alert('Completa todos los campos y sube el comprobante.');
       return;
     }
@@ -72,8 +77,8 @@ export default function CompanyLandingPage() {
     const { publicUrl } = supabase.storage.from('comprobantes').getPublicUrl(fileName).data;
 
     const { error: insertError } = await supabase.from('appointments').insert({
-      service_id: selectedServicio.id,
-      company_id: selectedServicio.company_id,
+      service_id: selectedServicios.id,
+      company_id: selectedServicios.company_id,
       date: fecha.split('T')[0],
       time: fecha.split('T')[1],
       phone: landingData?.phone ?? '',
@@ -87,7 +92,7 @@ export default function CompanyLandingPage() {
     }
 
     alert('Cita agendada. Espera confirmación.');
-    setSelectedServicio(null);
+    setSelectedServicios(null);
     setFecha('');
     setComprobante(null);
   };
@@ -119,6 +124,7 @@ export default function CompanyLandingPage() {
         <h2 className="text-2xl font-bold mb-4">Nuestros servicios</h2>
         <div className="services-grid">
         {servicios.map((s) => {
+          const isSelected = selectedServicios.some((sel) => sel.id === s.id);
           console.log('Renderizando servicio:', s.name);
           return (
           <ServiceCardFlip
@@ -128,52 +134,96 @@ export default function CompanyLandingPage() {
             price={s.price ?? 0}
             duration={s.duration_minutes ?? 0}
             image={s.image_url ?? 'https://via.placeholder.com/300x200?text=Sin+imagen'}
-            onClick={() => setSelectedServicio(s)}
+            onClick={() => {
+              if (isSelected) {
+                  setSelectedServicios(selectedServicios.filter((item) => item.id !== s.id));
+              } else {
+                  setSelectedServicios([...selectedServicios, s]);
+              }
+            }}
+            onAddToCart={() => {
+              setCarrito((prev) => {
+              const nuevo = [...prev, s];
+              console.log('Nuevo carrito:', nuevo);
+              return nuevo;
+            });
+              
+            }}
+            selected={isSelected}
           />
-        );
+         );
       })}
-        </div>
+      </div>
       </section>
 
       {/* Agendamiento */}
-      {selectedServicio && (
-        <section id="agendar" className="bg-gray-100 p-6 mt-8 rounded-lg shadow-md max-w-xl mx-auto">
-          <h3 className="text-xl font-bold mb-2">Agendar cita para: {selectedServicio.name}</h3>
-          <p className="mb-2 text-gray-600">Debes depositar el 50% del servicio a:</p>
+      {selectedServicios.length > 0 && (
+        <section id="agendar" className="appointment-box">
+          <h3 className="text-xl font-bold mb-2">Agendar cita para: {selectedServicios[0].name}</h3>
+          <p className="mb-2 text-gray-600">Debes depositar el 50% del servicio al siguiente número de cuenta:</p>
           <p className="text-base font-medium text-blue-700 bg-blue-50 p-2 rounded">
             {landingData?.bank_account || 'Cuenta bancaria no disponible'}
           </p>
 
-          <input
-            type="datetime-local"
-            className="w-full p-2 border rounded mb-4"
-            value={fecha}
-            onChange={(e) => setFecha(e.target.value)}
-          />
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DateTimePicker
+              label="Selecciona fecha y hora"
+              value={fecha ? dayjs(fecha) : null}
+              onChange={(newValue) => {
+                if (newValue) setFecha(newValue.toISOString());
+              }} 
+              className="w-full mb-4"
+              slotProps={{
+                textField: { fullWidth: true, variant: 'outlined' }
+              }}
+            />
+          </LocalizationProvider>
+
 
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Comprobante de pago:</label>
-            <input type="file" accept="image/*" onChange={(e) => {
-              if (e.target.files?.[0]) setComprobante(e.target.files[0]);
-            }} />
+            <label className="block text-sm font-medium mb-2">Comprobante de pago:</label>
+            <Button
+              variant="outlined"
+              component="label"
+              color="success"
+              sx={{ textTransform: 'none', fontWeight: 500 }}
+            >
+              Seleccionar archivo
+            <input
+              type="file"
+              hidden
+              accept="image/*"
+              onChange={(e) => {
+                if (e.target.files?.[0]) setComprobante(e.target.files[0]);
+              }}
+            /> 
+          </Button>
+          {comprobante && (
+            <p className="mt-2 text-sm text-gray-700">{comprobante.name}</p>
+            )}
           </div>
 
-          <div className="flex justify-between gap-4">
-            <button
+
+          <div className="flex gap-4 mt-8">
+            <Button
+              variant="contained"
+              color="primary"
               onClick={handleAgendarTurno}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              fullWidth
+              sx={{ py: 1.8, fontWeight: 500, borderRadius: 2, bgcolor: '#1976d2', '&:hover': {bgcolor: '#115293'}}}
             >
               Confirmar cita
-            </button>
-            <button
-              onClick={() => {
-                setCarrito([...carrito, selectedServicio]);
-                alert('Servicio añadido al carrito');
-              }}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            </Button>
+
+            <Button
+                variant="contained"
+                color="error"
+                onClick={() => setSelectedServicios([])}
+                fullWidth
+                sx={{ py: 1.5, fontWeight: 500, borderRadius: 2, bgcolor: '#d32f2f', '&:hover': {bgcolor: '#9a0007'} }}
             >
-              Añadir al carrito
-            </button>
+                Cancelar cita
+            </Button>
           </div>
         </section>
       )}
@@ -216,19 +266,7 @@ export default function CompanyLandingPage() {
 
       {/* Carrito */}
       {carrito.length > 0 && (
-        <section id="carrito" className="bg-white p-6 mt-10 rounded-lg shadow-md max-w-xl mx-auto">
-          <h3 className="text-xl font-bold mb-4">Carrito de compras</h3>
-          <ul className="divide-y divide-gray-200">
-            {carrito.map((item, index) => (
-              <li key={index} className="py-2">
-                {item.name} - ${item.price}
-              </li>
-            ))}
-          </ul>
-          <p className="mt-4 font-semibold">
-            Total: ${carrito.reduce((acc, s) => acc + s.price, 0).toFixed(2)}
-          </p>
-        </section>
+        <Cart carrito={carrito} setCarrito={setCarrito} />
       )}
     </div>
   );

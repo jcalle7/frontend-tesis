@@ -8,11 +8,22 @@ interface Props {
   duration: number;
   image: string;
   onClick: () => void;
+  onAddToCart: () => void;
+  selected: boolean;
 }
 
-export default function ServiceCardFlip({ name, description, price, duration, image, onClick }: Props) {
+export default function ServiceCardFlip({
+  name,
+  description,
+  price,
+  duration,
+  image,
+  onClick,
+  onAddToCart,
+  selected,
+}: Props) {
   return (
-    <div className="card-flip" onClick={onClick}>
+    <div className={`card-flip ${selected ? 'selected' : ''}`}>
       <div className="card-inner">
         {/* Frente */}
         <div className="card-front">
@@ -23,15 +34,16 @@ export default function ServiceCardFlip({ name, description, price, duration, im
           </div>
         </div>
 
-        {/* Atrás */}
+        {/* Reverso */}
         <div className="card-back">
-          <p className="text-sm text-gray-700 text-center">Precio: ${price}</p>
+          <p className="text-sm font-medium text-gray-800">Precio: ${price}</p>
           <p className="text-sm text-gray-700">Duración: {duration} min</p>
           <button
             className="select-button"
             onClick={(e) => {
               e.stopPropagation();
               onClick();
+              onAddToCart();
             }}
           >
             Añadir al carrito

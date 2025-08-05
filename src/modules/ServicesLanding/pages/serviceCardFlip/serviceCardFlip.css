@@ -68,6 +68,14 @@
 .select-button:hover {
   background-color: #1e40af;
 }
+.card-flip.selected {
+  border: 2px solid transparent;
+  box-shadow: 0 0 0 4px rgba(96, 246, 59, 0.3);
+  border-radius: 12px;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  transform: scale(1.01);
+}
+
 
 @media (max-width: 400px) {
   .card-flip {

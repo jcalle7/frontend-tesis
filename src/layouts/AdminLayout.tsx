@@ -58,10 +58,15 @@ export default function AdminLayout() {
     navigate('/login');
   };
 
-  const filteredNavItems = navItems.filter((item) => {
-    if (item.role === 'superadmin') return userRole === 'superadmin';
-    return true;
-  });
+const filteredNavItems = (() => {
+  if (userRole === 'superadmin') {
+    return [
+      { text: 'Inicio', icon: <EventNoteIcon />, path: '/' },
+      { text: 'Registrar Empresa', icon: <BusinessIcon />, path: '/register-company' },
+    ];
+  }
+  return navItems.filter((item) => !item.role || item.role === userRole);
+})();
 
   return (
     <Box sx={{ display: 'flex' }}>

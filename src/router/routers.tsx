@@ -8,7 +8,7 @@ import AllergyClientPage from "../modules/AllergyForm/AllergyClientPage.tsx";
 import AppointmentLandingPage from "../modules/ScheduleAppointment/AppointmentClientPage.tsx";
 import AppointmentListPage from "../modules/ViewAppointments/AppoinmentsListPage.tsx";
 import LoginPage from "../components/auth/login.tsx"; 
-import CompanyRegisterPage from "../modules/CompanyRegister/CompanyRegisterPage.tsx";
+import CompanyRegisterPage from "../modules/CompanyRegister/CompanyRegisterPage";
 import React from 'react';
 import ClientListPage from "../modules/RegisterClient/ListarClientes/ClientListPage.tsx";
 import FormPreview from "../modules/AllergyForm/ListarFormularios/FormsPreview.tsx";
@@ -18,6 +18,7 @@ import RedirectClientToSlugLanding from '../modules/ServicesLanding/pages/Redire
 import LoginClientPage from '../components/Pages/loginClientPage.tsx'; 
 import FillFormPage from '../modules/ViewAppointments/FillFormPage';
 import FormSubmissionsTable from "../modules/ViewAppointments/FormSubmissionsTable";
+import CompanyListPage from "../modules/CompanyRegister/CompanyListPage";
 
 export const router = createBrowserRouter([
   {
@@ -59,7 +60,7 @@ export const router = createBrowserRouter([
   children: [
     {
       index: true,
-      element: <div style={{ padding: '2rem' }}>Bienvenido al panel administrativo</div>,
+      element: <div style={{ padding: '5rem' }}>Bienvenido al panel administrativo</div>,
     },
     { path: 'register-client', element: <RegisterClientPage /> },
     { path: 'history-client', element: <ClientHistoryPage /> },
@@ -71,6 +72,7 @@ export const router = createBrowserRouter([
     {path: 'clientes', element: <ClientListPage />},
     {path: 'formularios', element: <FormsTable />},
     {path: 'formularios/vista-previa/:id', element: <FormPreview />},
+    {path: 'empresas', element: <CompanyListPage /> },
   ],
 },
 ]);

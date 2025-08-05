@@ -1,19 +1,21 @@
-import { useState } from 'react';
 import {
-  Box, Typography, TextField, Button, Snackbar, Alert, Backdrop, CircularProgress,
+  Box, Typography, TextField, Button, Snackbar,
+  Alert, Backdrop, CircularProgress
 } from '@mui/material';
-import {
-  formContainerCompany,
-  sectionTitleCompany,
-  buttonStyleCompany,
-  TitlePrincipalCompany,
-} from "./Styles/CompanyRegisterPage.styles.ts";
-import React from "react";
+import { useState } from 'react';
+import { formContainerCompany, sectionTitleCompany, buttonStyleCompany, TitlePrincipalCompany } from '../CompanyRegister/Styles/CompanyRegisterPage.ts';
+import SaveIcon from '@mui/icons-material/Save';
+import ListIcon from '@mui/icons-material/List';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import CalloutAlert from '../../components/ui/CalloutAlert';
 
 export default function CompanyRegisterPage() {
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
     name: '',
-    Ownername: '',
+    owner_name: '',
     ruc: '',
     phone: '',
     email: '',
@@ -22,14 +24,7 @@ export default function CompanyRegisterPage() {
     adminPassword: '',
   });
 
-  const generateSlug = (name: string) =>
-  name
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, '') // quitar símbolos
-    .replace(/\s+/g, '-')     // espacios a guiones
-    .replace(/-+/g, '-');     // quitar guiones duplicados
-
+  const [formError, setFormError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
@@ -37,39 +32,38 @@ export default function CompanyRegisterPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const generateSlug = (name: string) =>
+    name.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
+
   const isFormValid = () => {
     return Object.values(form).every((value) => value.trim() !== '');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!isFormValid()) {
-      setSnackbar({ open: true, message: '⚠️ Todos los campos son obligatorios.', severity: 'error' });
+      setFormError(true);
       return;
+    } else {
+      setFormError(false);
     }
 
     setLoading(true);
 
-    const slug = generateSlug(form.name); // genera el slug
+    const slug = generateSlug(form.name);
 
     const response = await fetch('https://vmmwiyxfuchcehscnhef.supabase.co/functions/v1/register_company_with_admin', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        // Optional: Se Puede enviar un token aquí si luego se quiere seguridad extra
-        // 'x-admin-token': 'TOKEN_INTERNO_SECRETO'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         company: {
           name: form.name,
-          Ownername: form.Ownername,
+          owner_name: form.owner_name,
           ruc: form.ruc,
           phone: form.phone,
           email: form.email,
           address: form.address,
-          slug: slug, // usa el slug generado
-
+          slug: slug,
         },
         admin: {
           email: form.adminEmail,
@@ -88,45 +82,43 @@ export default function CompanyRegisterPage() {
 
     setSnackbar({ open: true, message: '✅ Empresa y usuario creados correctamente', severity: 'success' });
     setForm({
-      name: '', Ownername: '', ruc: '', phone: '', email: '', address: '',
+      name: '', owner_name: '', ruc: '', phone: '', email: '', address: '',
       adminEmail: '', adminPassword: '',
     });
   };
 
   return (
     <Box component="form" onSubmit={handleSubmit} sx={formContainerCompany}>
-      <Typography variant="h4" sx={TitlePrincipalCompany}>
-        REGISTRAR EMPRESA
-      </Typography>
+      <Typography variant="h4" sx={TitlePrincipalCompany}>REGISTRAR EMPRESA</Typography>
+      
+      {formError && ( <CalloutAlert severity="error" title="Error al guardar" message={formError} /> )}
+      <TextField label="Nombre de la empresa" name="name" value={form.name} onChange={handleChange} error={formError && form.name.trim() === ''} helperText={formError && form.name.trim() === '' ? 'Completa este campo' : ''}/> 
+      <TextField label="Nombre del titular" name="owner_name" value={form.owner_name} onChange={handleChange} error={formError && form.name.trim() === ''} helperText={formError && form.name.trim() === '' ? 'Completa este campo' : ''}/>
+      <TextField label="RUC" name="ruc" value={form.ruc} onChange={handleChange} error={formError && form.name.trim() === ''} helperText={formError && form.name.trim() === '' ? 'Completa este campo' : ''}/>
+      <TextField label="Teléfono" name="phone" value={form.phone} onChange={handleChange} error={formError && form.name.trim() === ''} helperText={formError && form.name.trim() === '' ? 'Completa este campo' : ''}/>
+      <TextField label="Correo de la empresa" name="email" value={form.email} onChange={handleChange} error={formError && form.name.trim() === ''} helperText={formError && form.name.trim() === '' ? 'Completa este campo' : ''}/>
+      <TextField label="Dirección" name="address" value={form.address} onChange={handleChange} error={formError && form.name.trim() === ''} helperText={formError && form.name.trim() === '' ? 'Completa este campo' : ''}/>
 
-      <TextField label="Nombre de la empresa" name="name" value={form.name} onChange={handleChange} />
-      <TextField label="Nombre del titular" name="Ownername" value={form.Ownername} onChange={handleChange} />
-      <TextField label="RUC" name="ruc" value={form.ruc} onChange={handleChange} />
-      <TextField label="Teléfono" name="phone" value={form.phone} onChange={handleChange} />
-      <TextField label="Email de la empresa" name="email" value={form.email} onChange={handleChange} />
-      <TextField label="Dirección" name="address" value={form.address} onChange={handleChange} />
+      <Typography variant="h6" sx={sectionTitleCompany}>Usuario Administrador</Typography>
 
-      <Typography variant="h6" sx={sectionTitleCompany}>
-        Usuario Administrador
-      </Typography>
+      <TextField label="Correo del admin" name="adminEmail" value={form.adminEmail} onChange={handleChange} error={formError && form.name.trim() === ''} helperText={formError && form.name.trim() === '' ? 'Completa este campo' : ''}/>
+      <TextField type="password" label="Contraseña" name="adminPassword" value={form.adminPassword} onChange={handleChange} error={formError && form.name.trim() === ''} helperText={formError && form.name.trim() === '' ? 'Completa este campo' : ''}/>
 
-      <TextField label="Correo del admin" name="adminEmail" value={form.adminEmail} onChange={handleChange} />
-      <TextField label="Contraseña" name="adminPassword" type="password" value={form.adminPassword} onChange={handleChange} />
-
-      <Button type="submit" variant="contained" sx={buttonStyleCompany}>
-        GUARDAR
-      </Button>
+      <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+        <Button type="submit" variant="contained" color="success" startIcon={<SaveIcon />} sx={buttonStyleCompany}>
+          GUARDAR
+        </Button>
+        <Button variant="contained" color="primary" startIcon={<ListIcon />} onClick={() => navigate('/empresas')} sx={buttonStyleCompany}>
+          LISTAR EMPRESAS
+        </Button>
+      </Box>
 
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
       >
-        <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
-        >
+        <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })} sx={{ width: '100%' }}>
           {snackbar.message}
         </Alert>
       </Snackbar>

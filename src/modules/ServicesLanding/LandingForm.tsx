@@ -49,7 +49,7 @@ export default function LandingForm({ formData, onChange, onImageChange, onSubmi
         }}
         startIcon={<AddPhotoAlternateIcon />}
       >
-        Subir imagen o video de portada
+        Subir imagen de portada
         <input
           type="file"
           accept="image/*,video/*"
