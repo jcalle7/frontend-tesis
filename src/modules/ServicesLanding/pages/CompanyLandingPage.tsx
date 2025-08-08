@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../../../components/lib/supabaseClient.ts';
-import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
-import { Button } from '@mui/material';
 import { FaFacebook, FaInstagram, FaTiktok } from 'react-icons/fa';
 import { Phone, Email, LocationOn } from '@mui/icons-material';
 import ServiceCardFlip from '../../ServicesLanding/componentsLanding/ServiceCardFlip';
 import '../../../modules/ServicesLanding/pages/landingStyles/landingStyles.css';
 import Cart from '../componentsLanding/Cart'
+import Navbar from '../../ServicesLanding/componentsLanding/Navbar'; 
+import AppointmentModal from '../../ServicesLanding/componentsLanding/AppointmentModal';
 
 export default function CompanyLandingPage() {
   const { slug } = useParams();
@@ -17,9 +15,43 @@ export default function CompanyLandingPage() {
   const [landingData, setLandingData] = useState(null);
   const [servicios, setServicios] = useState([]);
   const [selectedServicios, setSelectedServicios] = useState<any[]>([]);
-  const [fecha, setFecha] = useState('');
-  const [comprobante, setComprobante] = useState<File | null>(null);
   const [carrito, setCarrito] = useState([]);
+  const [userName, setUserName] = useState('');
+  const [showCart, setShowCart] = useState(false);
+  const [showAgendar, setShowAgendar] = useState(false);
+  const [companyId, setCompanyId] = useState<string>('');
+  const [staffId, setStaffId] = useState<string>('');
+
+
+  useEffect(() => {
+  const fetchLoggedUserName = async () => {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !userData?.user) {
+      console.error('Usuario no autenticado o error:', userError);
+      return;
+    }
+
+    // Buscar en tu tabla personalizada de usuarios/clientes
+    const { data: clientData, error: clientError } = await supabase
+      .from('clients') // cambia según tu tabla real
+      .select('first_name, last_name, user_id, id' )
+      .eq('user_id', userData.user.id)
+      .maybeSingle();
+
+console.log('Cliente encontrado:', clientData, 'Error:', clientError);
+
+    if (clientError || !clientData) {
+      console.error('Error al obtener datos del cliente:', clientError);
+      return;
+    }
+
+    const fullName = `${clientData.first_name} ${clientData.last_name}`;
+    setUserName(fullName);
+  };
+
+  fetchLoggedUserName();
+}, []);
 
   useEffect(() => {
     const fetchLanding = async () => {
@@ -34,6 +66,17 @@ export default function CompanyLandingPage() {
 
       setEmpresaNombre(empresa.name);
       console.log('Empresa encontrada:', empresa);
+
+      const companyId = empresa.id;
+      const { data: staffRow } = await supabase
+      .from('staff')
+      .select('id')
+      .eq('company_id', companyId)
+      .maybeSingle();
+
+      // guarda en estado
+      setCompanyId(companyId);
+      setStaffId(staffRow?.id ?? '');
 
       const { data: landing, error: landingError } = await supabase
         .from('landing_data')
@@ -58,56 +101,109 @@ export default function CompanyLandingPage() {
     fetchLanding();
   }, [slug]);
 
-  const handleAgendarTurno = async () => {
-    if (!selectedServicios || !fecha || !comprobante) {
-      alert('Completa todos los campos y sube el comprobante.');
-      return;
-    }
+const handleAgendarTurno = async (fecha: string, comprobante: File | null) => {
+  if (!selectedServicios || selectedServicios.length === 0 || !fecha || !comprobante) {
+    alert('Completa todos los campos.');
+    return;
+  }
 
-    const fileName = `comprobantes/${Date.now()}_${comprobante.name}`;
-    const { error: uploadError } = await supabase
-      .storage.from('comprobantes')
-      .upload(fileName, comprobante);
+  // 1. Obtener el usuario autenticado
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData?.user?.id) {
+    alert('Error al obtener el usuario autenticado.');
+    return;
+  }
 
-    if (uploadError) {
-      alert('Error al subir el comprobante.');
-      return;
-    }
+  // 2. Obtener el client_id desde la tabla clients usando user_id
+const { data: clientRow, error: clientError } = await supabase
+  .from('clients')
+  .select('id')
+  .eq('user_id', userData.user.id)
+  .maybeSingle();
 
-    const { publicUrl } = supabase.storage.from('comprobantes').getPublicUrl(fileName).data;
+if (clientError || !clientRow) {
+  alert('Error al obtener el ID del cliente.');
+  return;
+}
 
-    const { error: insertError } = await supabase.from('appointments').insert({
-      service_id: selectedServicios.id,
-      company_id: selectedServicios.company_id,
-      date: fecha.split('T')[0],
-      time: fecha.split('T')[1],
-      phone: landingData?.phone ?? '',
-      status: 'pendiente',
-      comprobante_url: publicUrl
-    });
+const clientId = clientRow.id;
+console.log("clientId que se insertará:", clientId);
 
-    if (insertError) {
-      alert('Error al agendar cita.');
-      return;
-    }
+  // 3. Subir comprobante al bucket correcto
+  const fileName = `comprobantes/${Date.now()}_${comprobante.name}`;
+  const { error: uploadError } = await supabase
+    .storage.from('imagenes') // <-- Tu bucket real
+    .upload(fileName, comprobante);
 
-    alert('Cita agendada. Espera confirmación.');
-    setSelectedServicios(null);
-    setFecha('');
-    setComprobante(null);
-  };
+  if (uploadError) {
+    alert('Error al subir el comprobante.');
+    return;
+  }
 
-  console.log('Servicios a renderizar:', servicios);
+  // 4. Obtener URL pública del comprobante
+  const { publicUrl } = supabase.storage.from('imagenes').getPublicUrl(fileName).data;
+
+  // 5. Insertar en appointments (usa solo columnas existentes)
+const dateObject = new Date(fecha);
+const hora = dateObject.toTimeString().split(' ')[0]; // HH:mm:ss
+
+const { data: citaId, error: rpcError } = await supabase.rpc('insertar_cita_cliente', {
+  p_company_id: selectedServicios[0]?.company_id,
+  p_date: fecha.split('T')[0],
+  p_time: hora,
+  p_phone: landingData?.phone ?? '',
+  p_comprobante_url: publicUrl,
+  p_client_id: clientId
+});
+
+if (rpcError || !citaId) {
+  console.error("Error RPC:", rpcError);
+  alert("Error al agendar la cita.");
+  return;
+}
+
+
+  // 6. Insertar en appointment_services
+const serviceIds: string[] = selectedServicios.map((s) => {
+  const maybeId = typeof s?.id === 'object' ? s?.id?.id : s?.id;
+  return typeof maybeId === 'string' ? maybeId : '';
+}).filter((id) => /^[0-9a-fA-F-]{36}$/.test(id));
+
+// Validaciones opcionales
+console.log("Enviando serviceIds:", serviceIds);
+console.log("Todos válidos:", serviceIds.every(id => /^[0-9a-fA-F-]{36}$/.test(id)));
+
+// Extraer el ID real de la cita
+const citaUuid = Array.isArray(citaId) && citaId.length > 0
+  ? citaId[0].id
+  : citaId;
+
+// Llama a Supabase
+console.log("citaId que devuelve insertar_cita_cliente:", citaId);
+
+const { error: serviciosError } = await supabase.rpc('insertar_servicios_de_cita_json', {
+  p_appointment_id: citaUuid,
+  p_service_ids: serviceIds
+});
+
+
+if (serviciosError) {
+  console.error('Error al insertar servicios:', serviciosError);
+  alert('Error al registrar los servicios de la cita.');
+  return;
+}
+
+  // 7. Finalizar
+  alert('Cita agendada con éxito. Espera confirmación.');
+  setSelectedServicios([]);
+  setCarrito([]);
+  setShowAgendar(false);
+};
+
   return (
     <div className="min-h-screen">
-      <nav className="bg-white px-6 py-3 shadow-md flex justify-between items-center sticky top-0 z-50">
-        <div className="space-x-6">
-          <a href="#servicios" className="hover:text-blue-600">Servicios</a>
-          <a href="#agendar" className="hover:text-blue-600">Agendar</a>
-          <a href="#contacto" className="hover:text-blue-600">Contacto</a>
-          <a href="#carrito" className="hover:text-blue-600">🛒 Carrito</a>
-        </div>
-      </nav>
+      <Navbar userName={userName || 'Cliente'} companyName={empresaNombre || 'Nombre empresa'}   carrito={carrito}
+  setShowCart={setShowCart} />
 
       {/* Portada */}
       {landingData?.cover_url && (
@@ -157,76 +253,15 @@ export default function CompanyLandingPage() {
       </section>
 
       {/* Agendamiento */}
-      {selectedServicios.length > 0 && (
-        <section id="agendar" className="appointment-box">
-          <h3 className="text-xl font-bold mb-2">Agendar cita para: {selectedServicios[0].name}</h3>
-          <p className="mb-2 text-gray-600">Debes depositar el 50% del servicio al siguiente número de cuenta:</p>
-          <p className="text-base font-medium text-blue-700 bg-blue-50 p-2 rounded">
-            {landingData?.bank_account || 'Cuenta bancaria no disponible'}
-          </p>
-
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DateTimePicker
-              label="Selecciona fecha y hora"
-              value={fecha ? dayjs(fecha) : null}
-              onChange={(newValue) => {
-                if (newValue) setFecha(newValue.toISOString());
-              }} 
-              className="w-full mb-4"
-              slotProps={{
-                textField: { fullWidth: true, variant: 'outlined' }
-              }}
-            />
-          </LocalizationProvider>
-
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">Comprobante de pago:</label>
-            <Button
-              variant="outlined"
-              component="label"
-              color="success"
-              sx={{ textTransform: 'none', fontWeight: 500 }}
-            >
-              Seleccionar archivo
-            <input
-              type="file"
-              hidden
-              accept="image/*"
-              onChange={(e) => {
-                if (e.target.files?.[0]) setComprobante(e.target.files[0]);
-              }}
-            /> 
-          </Button>
-          {comprobante && (
-            <p className="mt-2 text-sm text-gray-700">{comprobante.name}</p>
-            )}
-          </div>
-
-
-          <div className="flex gap-4 mt-8">
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleAgendarTurno}
-              fullWidth
-              sx={{ py: 1.8, fontWeight: 500, borderRadius: 2, bgcolor: '#1976d2', '&:hover': {bgcolor: '#115293'}}}
-            >
-              Confirmar cita
-            </Button>
-
-            <Button
-                variant="contained"
-                color="error"
-                onClick={() => setSelectedServicios([])}
-                fullWidth
-                sx={{ py: 1.5, fontWeight: 500, borderRadius: 2, bgcolor: '#d32f2f', '&:hover': {bgcolor: '#9a0007'} }}
-            >
-                Cancelar cita
-            </Button>
-          </div>
-        </section>
-      )}
+        <AppointmentModal
+          open={showAgendar}
+          onClose={() => { setShowAgendar(false); setSelectedServicios([]); }}
+          onConfirm={handleAgendarTurno} // ← NO lo toco
+          selectedServices={selectedServicios}
+          bankAccount={landingData?.bank_account || ''}
+          companyId={companyId}  
+          staffId={staffId}
+        />
 
       {/* Contacto */}
       {(landingData?.phone || landingData?.email || landingData?.address) && (
@@ -265,9 +300,17 @@ export default function CompanyLandingPage() {
       )}
 
       {/* Carrito */}
-      {carrito.length > 0 && (
-        <Cart carrito={carrito} setCarrito={setCarrito} />
-      )}
+      {showCart && carrito.length > 0 && (
+        <Cart
+          carrito={carrito}
+          setCarrito={setCarrito}
+          onPagar={() => {
+          setShowCart(false);
+          setShowAgendar(true);
+          setSelectedServicios([...carrito]); 
+        }}
+      />
+    )}
     </div>
   );
 }

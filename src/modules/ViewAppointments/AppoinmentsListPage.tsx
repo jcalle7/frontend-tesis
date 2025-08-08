@@ -76,7 +76,7 @@ const handleAccept = async (id: string) => {
 
       const { data, error } = await supabase
         .from("appointments")
-        .select("id, date, time, status, phone, client_id, clients(first_name, last_name, phone)")
+        .select("id, date, time, status, phone, comprobante_url, client_id, clients(first_name, last_name, phone)")
         .eq("company_id", empresaData?.company_id)
         .order("date", { ascending: true });
 
@@ -89,6 +89,7 @@ const handleAccept = async (id: string) => {
           hora: item.time,
           telefono: item.clients?.phone ?? item.phone ?? "",
           clientId: item.client_id,
+          comprobante: item.comprobante_url ?? null,
         }));
         setAppointments(parsed);
       }

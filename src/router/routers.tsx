@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import AdminLayout from "../layouts/AdminLayout.tsx";
 import ProtectedRoute from "./ProtectedRoute.tsx"; 
+import ClientProtectedRoute from './ClientProtectedRoute';
 import RegisterClientPage from "../modules/RegisterClient/RegisterClientPage.tsx";
 import ClientHistoryPage from "../modules/ClientHistory/ClientHistoryPage.tsx";
 import ServiceManager from "../modules/ServicesLanding/pages/ServiceManager.tsx";
@@ -19,6 +20,8 @@ import LoginClientPage from '../components/Pages/loginClientPage.tsx';
 import FillFormPage from '../modules/ViewAppointments/FillFormPage';
 import FormSubmissionsTable from "../modules/ViewAppointments/FormSubmissionsTable";
 import CompanyListPage from "../modules/CompanyRegister/CompanyListPage";
+import ClientsAppointments from '../modules/ServicesLanding/pages/ClientAppointments'; 
+
 
 export const router = createBrowserRouter([
   {
@@ -50,13 +53,21 @@ export const router = createBrowserRouter([
   element: <RedirectClientToSlugLanding />
   },
   {
+  path: '/mis-citas',
+  element: (
+    <ClientProtectedRoute>
+      <ClientsAppointments />
+    </ClientProtectedRoute>
+  ),
+  },
+  {
   path: '/',
   element: (
     <ProtectedRoute>
       <AdminLayout />
     </ProtectedRoute>
   ),
-  errorElement: <div style={{ padding: '2rem' }}>Ruta no encontrada 😢</div>, 
+  errorElement: <div style={{ padding: '5rem' }}>Ruta no encontrada 😢</div>, 
   children: [
     {
       index: true,

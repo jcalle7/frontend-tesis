@@ -72,6 +72,21 @@ export default function AppointmentTable({ rows, onAccept, onCancel, onSendForm 
         </div>
       ),
     },
+    {
+      field: 'comprobante',
+      headerName: 'Comprobante',
+      flex: 1,
+      renderCell: (params: GridRenderCellParams) => {
+      return params.value ? (
+      <a href={params.value} target="_blank" rel="noopener noreferrer">
+        Ver imagen
+      </a>
+    ) : (
+      <span>—</span>
+    );
+    },
+  },
+
   ];
 
   return (

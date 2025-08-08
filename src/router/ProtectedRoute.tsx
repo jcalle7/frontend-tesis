@@ -10,11 +10,10 @@ export default function ProtectedRoute({ children }: React.PropsWithChildren) {
   useEffect(() => {
     const verifyAccess = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return setLoading(false); // No autenticado
+      if (!session) return setLoading(false); 
 
       const userId = session.user.id;
 
-      // Buscar el rol del usuario en la tabla company_users
       const { data: companyUser, error } = await supabase
         .from('company_users')
         .select('role')
@@ -24,7 +23,6 @@ export default function ProtectedRoute({ children }: React.PropsWithChildren) {
       if (error || !companyUser) {
         setIsAllowed(false);
       } else {
-        // Solo se permite acceso si es superadmin, admin o empresa
         setIsAllowed(companyUser.role === 'admin' || companyUser.role === 'empresa' || companyUser.role === 'superadmin');
       }
 
