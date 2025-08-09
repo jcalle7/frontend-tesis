@@ -1,10 +1,10 @@
 import { Box, TextField, Typography, Snackbar, Alert } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AppointmentTable from "./AppoinmentsTable";
-import { AppointmentData } from "./TypesCitas";
+import { AppointmentData, EstadoCita } from "./TypesCitas";
 import { useEffect, useState } from "react";
 import { supabase } from "../../components/lib/supabaseClient.ts";
-import SendFormDialog from "../ViewAppointments/SendFormDialog"; // Asegúrate de que esta ruta esté bien
+import SendFormDialog from "../ViewAppointments/SendFormDialog";
 
 export default function AppointmentListPage() {
   const [appointments, setAppointments] = useState<AppointmentData[]>([]);
@@ -81,10 +81,10 @@ const handleAccept = async (id: string) => {
         .order("date", { ascending: true });
 
       if (!error && data) {
-        const parsed = data.map((item: any) => ({
+        const parsed: AppointmentData[] = data.map((item: any) => ({
           id: item.id,
           nombre: `${item.clients?.first_name ?? ""} ${item.clients?.last_name ?? ""}`,
-          estado: item.status.toLowerCase(),
+          estado: (item.status.toLowerCase()?? 'pendiente') as EstadoCita,
           fecha: item.date,
           hora: item.time,
           telefono: item.clients?.phone ?? item.phone ?? "",

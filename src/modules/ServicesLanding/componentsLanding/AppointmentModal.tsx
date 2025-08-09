@@ -1,11 +1,7 @@
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
-  Typography, Button, TextField, Stack, Alert, DialogContentText
+  Typography, Button, Stack, Alert, DialogContentText
 } from '@mui/material';
-import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import 'dayjs/locale/es';
-import dayjs from 'dayjs';
 import { useState } from 'react';
 import BookingWidget from '../componentsLanding/BookingWidget'; 
 

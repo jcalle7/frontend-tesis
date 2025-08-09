@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../../../components/lib/supabaseClient.ts';
 import {
   Container, Typography, Card, CardContent,
   Grid, Chip, CircularProgress
 } from '@mui/material';
+import type { ChipProps } from '@mui/material';
 import dayjs from 'dayjs';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
@@ -115,72 +116,76 @@ export default function ClientsAppointments() {
     fetchCitasDelCliente();
   }, []);
 
-  return (
-    <Container maxWidth="md" sx={{ pt: 5 }}>
-      <Typography variant="h4" gutterBottom fontWeight="bold">
-        Mis citas
-      </Typography>
+return (
+  <Container maxWidth="md" sx={{ pt: 5 }}>
+    <Typography variant="h4" gutterBottom fontWeight="bold">
+      Mis citas
+    </Typography>
 
-      {loading ? (
-        <CircularProgress />
-      ) : citas.length === 0 ? (
-        <Typography variant="body1">No tienes citas agendadas aún.</Typography>
-      ) : (
-        <Grid container spacing={3}>
-          {citas.map((cita) => (
+    {loading ? (
+      <CircularProgress />
+    ) : citas.length === 0 ? (
+      <Typography variant="body1">No tienes citas agendadas aún.</Typography>
+    ) : (
+      <Grid container spacing={3}>
+        {citas.map((cita) => {
+          const chipColor: ChipProps['color'] =
+            cita.status === 'pendiente'
+              ? 'warning'
+              : cita.status === 'confirmado'
+              ? 'success'
+              : 'default';
+
+          return (
             <Grid item xs={12} key={cita.id}>
               <Card elevation={2}>
                 <CardContent>
                   <Typography variant="h6">
                     Cita del {dayjs(cita.date).format('DD/MM/YYYY')} a las {cita.time}
                   </Typography>
+
                   <Typography fontSize={14} color="text.secondary" mt={1}>
                     Servicios:
                   </Typography>
+
                   <ul style={{ marginTop: 4, paddingLeft: 20 }}>
                     {cita.servicios.map((s, index) => (
-                      <li key={index}>{s.name} — ${s.price} | {s.duration_minutes}</li>
+                      <li key={index}>
+                        {`${s.name} — $${s.price ?? 0} | ${s.duration_minutes ?? ''} min`}
+                      </li>
                     ))}
                   </ul>
-                  <Chip
-                    label={cita.status.toUpperCase()}
-                    color={
-                      cita.status === 'pendiente'
-                        ? 'warning'
-                        : cita.status === 'confirmado'
-                        ? 'success'
-                        : 'default'
-                    }
-                    size="small"
-                    sx={{ mt: 2 }}
-                  />
+
+                  <Chip label={cita.status.toUpperCase()} color={chipColor} size="small" sx={{ mt: 2 }} />
                 </CardContent>
               </Card>
             </Grid>
-          ))}
-        </Grid>
-      )}
-      
-        <button
-        onClick={() => navigate(`/empresa/${slugEmpresa}`)}
-        style={{
-          backgroundColor: '#9C27B0',
-          color: 'white',
-          padding: '10px 20px',
-          border: 'none',
-          borderRadius: '8px',
-          fontWeight: 'bold',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
-          marginBottom: '2rem',
-          cursor: 'pointer'
-        }}
-        >        
-        <ArrowBackIcon style={{ fontSize: 20 }} />
-        REGRESAR
-        </button>
-    </Container>
-  );
+          );
+        })}
+      </Grid>
+    )}
+
+    <button
+      onClick={() => navigate(`/empresa/${slugEmpresa}`)}
+      style={{
+        backgroundColor: '#9C27B0',
+        color: 'white',
+        padding: '10px 20px',
+        border: 'none',
+        borderRadius: '8px',
+        fontWeight: 'bold',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+        marginBottom: '2rem',
+        cursor: 'pointer',
+      }}
+    >
+      <ArrowBackIcon style={{ fontSize: 20 }} />
+      REGRESAR
+    </button>
+  </Container>
+);
 }
+

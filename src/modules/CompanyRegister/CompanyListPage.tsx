@@ -1,7 +1,7 @@
 import {
   Box, IconButton, Snackbar, Alert, Tooltip,
-  TextField, Dialog, DialogTitle, DialogContent,
-  DialogContentText, DialogActions, Button,
+  TextField,
+  DialogContentText, Button,
   Typography, InputAdornment
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
@@ -16,15 +16,16 @@ import DeleteCompanyModal from '../CompanyRegister/modals/DeleteCompanyModal';
 import { useNavigate } from 'react-router-dom';
 import { containerStylesCompanyList, titleStylesCompanyList } from '../CompanyRegister/Styles/CompanyListPage.styles.ts';
 import { CompanyFormData } from './TypesCompany.ts';
+type CompanyWithId = CompanyFormData & { id: string };
 
 export default function CompanyListPage() {
   const navigate = useNavigate();
-  const [empresas, setEmpresas] = useState<CompanyFormData[]>([]);
-  const [filteredEmpresas, setFilteredEmpresas] = useState<CompanyFormData[]>([]);
+  const [empresas, setEmpresas] = useState<CompanyWhitId[]>([]);
+  const [filteredEmpresas, setFilteredEmpresas] = useState<CompanyWhitId[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [selectedCompany, setSelectedCompany] = useState<CompanyFormData | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<CompanyWhitId | null>(null);
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
@@ -44,8 +45,8 @@ export default function CompanyListPage() {
       if (error) {
       setSnackbar({ open: true, message: 'Error al obtener empresas.', severity: 'error' });
     } else {
-      setEmpresas(data);
-      setFilteredEmpresas(data);
+      setEmpresas((data ?? []) as CompanyWithId[]);
+      setFilteredEmpresas((data ?? []) as CompanyWithId[]);
     }
   };
 
@@ -77,7 +78,7 @@ const columns: GridColDef[] = [
     field: 'acciones',
     headerName: 'Acciones',
     flex: 1,
-    renderCell: (params: GridRenderCellParams<CompanyFormData>) => (
+    renderCell: (params: GridRenderCellParams<CompanyWhitId>) => (
       <>
         <Tooltip title="Editar">
           <IconButton color="primary" onClick={() => { setSelectedCompany(params.row); setEditOpen(true); }}>

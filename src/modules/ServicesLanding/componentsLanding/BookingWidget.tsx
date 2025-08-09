@@ -3,7 +3,7 @@ import { Box, Chip, CircularProgress, List, ListItemButton, Stack, Typography } 
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
-import { PickersDay } from '@mui/x-date-pickers/PickersDay';
+import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
 import { es } from 'date-fns/locale'
 import { format, startOfDay } from 'date-fns'
 import { supabase } from '../../../components/lib/supabaseClient.ts';
@@ -18,7 +18,7 @@ type Props = {
 }
 
 export default function BookingWidget({ companyId, staffId, serviceIds, onSelect }: Props) {
-  const [day, setDay] = React.useState<Date>(new Date())
+  const [day, setDay] = React.useState<Date>(new Date());
   const [slots, setSlots] = React.useState<Slot[] | null>(null)
   const [loadingSlots, setLoadingSlots] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
@@ -87,25 +87,32 @@ export default function BookingWidget({ companyId, staffId, serviceIds, onSelect
   React.useEffect(() => { loadMonthCounts() }, [companyId, staffId, year, month, JSON.stringify(serviceIds)])
   React.useEffect(() => { loadDaySlots() }, [companyId, staffId, dayISO, JSON.stringify(serviceIds)])
 
-  const renderDay = (date: Date, _selected: any, pickersDayProps: any) => {
-    const key = format(date, 'yyyy-MM-dd')
-    const count = monthCounts[key] ?? 0
-    const isPast = startOfDay(date) < startOfDay(new Date())
-    return (
-      <Box sx={{ position: 'relative' }}>
-        <PickersDay {...pickersDayProps} disabled={isPast || count === 0} />
-        {count > 0 && (
-          <Chip label={count} size="small"
-            sx={{ position: 'absolute', bottom: 2, right: 2, transform: 'scale(0.75)', pointerEvents: 'none' }} />
-        )}
-      </Box>
-    )
-  }
+const renderDay = (
+  date: Date,
+  _selectedDates: Array<Date | null>,
+  pickersDayProps: PickersDayProps<Date>
+) => {
+  const key = format(date, 'yyyy-MM-dd');
+  const count = monthCounts[key] ?? 0;
+  const isPast = startOfDay(date) < startOfDay(new Date());
 
+  return (
+    <Box sx={{ position: 'relative' }}>
+      <PickersDay {...pickersDayProps} disabled={isPast || count === 0} />
+      {count > 0 && (
+        <Chip
+          label={count}
+          size="small"
+          sx={{ position: 'absolute', bottom: 2, right: 2, transform: 'scale(0.75)', pointerEvents: 'none' }}
+        />
+      )}
+    </Box>
+  );
+};
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
       <Stack spacing={2}>
-        <DateCalendar value={day} onChange={(d) => d && setDay(d)} onMonthChange={(m) => m && setDay(m)} renderDay={renderDay}/>
+        <DateCalendar<Date> value={day} onChange={(d) => { if (d) setDay(d); }} onMonthChange={(m) => setDay(m)} renderDay={renderDay}/>
         {(loadingMonth || loadingSlots) && <CircularProgress size={24} />}
         {error && <Typography color="error" variant="body2">{error}</Typography>}
         {!loadingSlots && slots && (

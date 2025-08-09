@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import '../pages/serviceCardFlip/serviceCardFlip.css';
 
 interface Props {

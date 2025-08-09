@@ -2,7 +2,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Button, Typography, Snackbar, Alert
 } from '@mui/material';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { CompanyFormData } from '../TypesCompany.ts';
 import { supabase } from '../../../components/lib/supabaseClient.ts';
 

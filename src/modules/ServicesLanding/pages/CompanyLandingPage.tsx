@@ -9,16 +9,38 @@ import Cart from '../componentsLanding/Cart'
 import Navbar from '../../ServicesLanding/componentsLanding/Navbar'; 
 import AppointmentModal from '../../ServicesLanding/componentsLanding/AppointmentModal';
 
+type LandingData = {
+  cover_url?: string;
+  title?: string;
+  bank_account?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  facebook_url?: string;
+  instagram_url?: string;
+  tiktok_url?: string;
+};
+
+type ServicioLanding = {
+  id: string;
+  name?: string;
+  description?: string;
+  price?: number;
+  duration_minutes?: number;
+  image_url?: string;
+  company_id?: string;
+};
+
 export default function CompanyLandingPage() {
   const { slug } = useParams();
-  const [empresaNombre, setEmpresaNombre] = useState('');
-  const [landingData, setLandingData] = useState(null);
-  const [servicios, setServicios] = useState([]);
-  const [selectedServicios, setSelectedServicios] = useState<any[]>([]);
-  const [carrito, setCarrito] = useState([]);
-  const [userName, setUserName] = useState('');
-  const [showCart, setShowCart] = useState(false);
-  const [showAgendar, setShowAgendar] = useState(false);
+  const [empresaNombre, setEmpresaNombre] = useState<string>('');
+  const [landingData, setLandingData] = useState<LandingData | null>(null);
+  const [servicios, setServicios] = useState<ServicioLanding[]>([]);
+  const [selectedServicios, setSelectedServicios] = useState<ServicioLanding[]>([]);
+  const [carrito, setCarrito] = useState<ServicioLanding[]>([]);
+  const [userName, setUserName] = useState<string>('');
+  const [showCart, setShowCart] = useState<boolean>(false);
+  const [showAgendar, setShowAgendar] = useState<boolean>(false);
   const [companyId, setCompanyId] = useState<string>('');
   const [staffId, setStaffId] = useState<string>('');
 
@@ -86,7 +108,7 @@ console.log('Cliente encontrado:', clientData, 'Error:', clientError);
     
         if (landingError) console.error('Error en landing:', landingError);
 
-        setLandingData(landing || null);
+        setLandingData((landing ?? null) as LandingData | null);
 
       const { data: serviciosData, error: serviciosError } = await supabase
         .from('services')
@@ -96,7 +118,7 @@ console.log('Cliente encontrado:', clientData, 'Error:', clientError);
         console.log('Servicios cargados:', serviciosData); // <- los servicios que trae
         if (serviciosError) console.error('Error al obtener servicios:', serviciosError);
 
-      setServicios(serviciosData || []);
+        setServicios((serviciosData ?? []) as ServicioLanding[]);
     };
     fetchLanding();
   }, [slug]);

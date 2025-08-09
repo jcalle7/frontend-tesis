@@ -10,7 +10,6 @@
   import { IconButton, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
   import VisibilityIcon from '@mui/icons-material/Visibility';
   import { useState } from 'react';
-  import React from 'react';
 
   export default function ClientTable({ rows }: ClientTableProps) {
       const [modalOpen, setModalOpen] = useState(false);

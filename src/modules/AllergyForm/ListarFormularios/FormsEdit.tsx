@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../../../components/lib/supabaseClient.ts';
 import { Box, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton, Snackbar, Alert } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';

@@ -10,7 +10,6 @@ import AppointmentLandingPage from "../modules/ScheduleAppointment/AppointmentCl
 import AppointmentListPage from "../modules/ViewAppointments/AppoinmentsListPage.tsx";
 import LoginPage from "../components/auth/login.tsx"; 
 import CompanyRegisterPage from "../modules/CompanyRegister/CompanyRegisterPage";
-import React from 'react';
 import ClientListPage from "../modules/RegisterClient/ListarClientes/ClientListPage.tsx";
 import FormPreview from "../modules/AllergyForm/ListarFormularios/FormsPreview.tsx";
 import FormsTable from "../modules/AllergyForm/ListarFormularios/FormsTable.tsx";
@@ -21,7 +20,6 @@ import FillFormPage from '../modules/ViewAppointments/FillFormPage';
 import FormSubmissionsTable from "../modules/ViewAppointments/FormSubmissionsTable";
 import CompanyListPage from "../modules/CompanyRegister/CompanyListPage";
 import ClientsAppointments from '../modules/ServicesLanding/pages/ClientAppointments'; 
-
 
 export const router = createBrowserRouter([
   {

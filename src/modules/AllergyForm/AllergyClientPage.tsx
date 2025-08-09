@@ -1,8 +1,8 @@
 import { Typography, Box, Button } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import React, { useState } from 'react';
 import DynamicAllergyForm from "../AllergyForm/DynamicAllergyForm.tsx";
 import FormsTable from "../AllergyForm/ListarFormularios/FormsTable.tsx";
+import { useState } from 'react';
 import { containerStylesAllergy, titleStylesAllergy } from "../AllergyForm/Styles/AllergyClientPage.styles.ts";
 
 export default function AllergyClientPage() {

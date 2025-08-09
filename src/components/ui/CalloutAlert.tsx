@@ -1,5 +1,4 @@
 import { Alert, AlertColor, AlertTitle } from '@mui/material';
-import React from 'react';
 
 type Props = {
   severity: AlertColor;

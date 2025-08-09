@@ -1,13 +1,10 @@
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { Button, Chip } from '@mui/material';
 import { AppointmentData } from "./TypesCitas";
-import {
-  actionButtonsContainerAppointments,
-  acceptButtonStyleAppointments,
-  cancelButtonStyleAppointments,
-} from "./Styles/AppointmentTable.styles";
+import { actionButtonsContainerAppointments, acceptButtonStyleAppointments, cancelButtonStyleAppointments } from "./Styles/AppointmentTable.styles";
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import React from 'react';
+import type { ChipProps } from '@mui/material';
 
 interface AppointmentTableProps {
   rows: AppointmentData[];
@@ -24,15 +21,17 @@ export default function AppointmentTable({ rows, onAccept, onCancel, onSendForm 
       headerName: 'Estado',
       flex: 1,
       renderCell: (params: GridRenderCellParams) => {
-        const estado = params.value?.toLowerCase();
+        const estado = String(params.value?? '').toLowerCase();
         
-        const color: 'success' | 'warning' | 'error' =
-          estado === 'aceptada' ? 'success' 
-          : estado === 'pendiente' ? 'warning' : 'error';
+      type ChipColor = 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
+      let color: ChipColor = 'default';
+      if (estado === 'aceptada') color = 'success';
+      else if (estado === 'pendiente') color = 'warning';
+      else if (estado === 'cancelada') color = 'error';
 
-          const label = estado.charAt(0).toUpperCase() + estado.slice(1); 
+      const label = estado ? estado.charAt(0).toUpperCase() + estado.slice(1) : '—';
 
-        return <Chip label={params.value} color={color} />;
+        return <Chip label={value} color={color} />;
       },
     },
     { field: 'fecha', headerName: 'Fecha', flex: 1 },
@@ -48,7 +47,7 @@ export default function AppointmentTable({ rows, onAccept, onCancel, onSendForm 
             variant="contained"
             onClick={() => onAccept(params.row.id)}
             sx={acceptButtonStyleAppointments}
-            disabled={params.row.estado.toLowerCase() !== 'pendiente'}
+            disabled={String(params.row.estado ?? '').toLowerCase() !== 'pendiente'}
           >
             ACEPTAR
           </Button>
@@ -57,7 +56,7 @@ export default function AppointmentTable({ rows, onAccept, onCancel, onSendForm 
             variant="outlined"
             onClick={() => onCancel(params.row.id)}
             sx={cancelButtonStyleAppointments}
-            disabled={params.row.estado.toLowerCase() !== 'pendiente'}
+            disabled={String(params.row.estado ?? '').toLowerCase() !== 'pendiente'}
           >
             CANCELAR
           </Button>
@@ -76,15 +75,14 @@ export default function AppointmentTable({ rows, onAccept, onCancel, onSendForm 
       field: 'comprobante',
       headerName: 'Comprobante',
       flex: 1,
-      renderCell: (params: GridRenderCellParams) => {
-      return params.value ? (
-      <a href={params.value} target="_blank" rel="noopener noreferrer">
+      renderCell: (params: GridRenderCellParams) => 
+      params.value ? (
+      <a href={params.value as string} target="_blank" rel="noopener noreferrer">
         Ver imagen
       </a>
     ) : (
       <span>—</span>
-    );
-    },
+    ),
   },
 
   ];

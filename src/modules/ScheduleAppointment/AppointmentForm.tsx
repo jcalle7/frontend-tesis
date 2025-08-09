@@ -10,7 +10,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import dayjs, { Dayjs } from 'dayjs';
 import { supabase } from '../../components/lib/supabaseClient.ts'; 
-import React from "react";
+import type { Dayjs } from 'dayjs';
 
 export default function AppointmentForm() {
   const [formData, setFormData] = useState<AppointmentFormData>({
@@ -63,10 +63,10 @@ export default function AppointmentForm() {
     fetchAll();
   }, []);
 
-  const handleDateChange = (newValue: Dayjs | null) => {
-    if (newValue) {
-      setFormData((prev) => ({ ...prev, fechaHora: newValue.toISOString() }));
-    }
+  const handleDateChange: NonNullable<DateTimePickerProps<Dayjs>['onChange']> = (newValue) => {
+  if (newValue) {
+    setFormData((prev) => ({ ...prev, fechaHora: newValue.toISOString() }));
+  }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

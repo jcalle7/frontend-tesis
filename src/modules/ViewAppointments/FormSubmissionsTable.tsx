@@ -34,6 +34,7 @@ export default function FormSubmissionsTable() {
       if (errEmpresa) return console.error("Error empresa:", errEmpresa.message);
       setCompanyId(empresaData.company_id);
 
+      const companyId = empresaData.company_id;
       const { data, error } = await supabase
         .from("form_submissions")
         .select(`

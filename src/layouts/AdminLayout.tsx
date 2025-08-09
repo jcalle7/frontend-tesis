@@ -25,7 +25,6 @@ import EventNoteIcon from '@mui/icons-material/EventNote';
 import BusinessIcon from '@mui/icons-material/Business'; 
 
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import React from 'react';
 
 const drawerWidthExpanded = 230;
 const drawerWidthCollapsed = 70;

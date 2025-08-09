@@ -4,7 +4,6 @@ import ClientTable from "./ClientTable.tsx";
 import { ClientHistory } from "./TypesHistory.tsx";
 import { useEffect, useState } from 'react';
 import { supabase } from '../../components/lib/supabaseClient.ts';
-import React from "react";
 
 async function fetchClientHistory(): Promise<ClientHistory[]> {
   const { data: user } = await supabase.auth.getUser();
