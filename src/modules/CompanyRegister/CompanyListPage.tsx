@@ -1,7 +1,6 @@
 import {
   Box, IconButton, Snackbar, Alert, Tooltip,
-  TextField,
-  DialogContentText, Button,
+  TextField, Button,
   Typography, InputAdornment
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
@@ -20,12 +19,12 @@ type CompanyWithId = CompanyFormData & { id: string };
 
 export default function CompanyListPage() {
   const navigate = useNavigate();
-  const [empresas, setEmpresas] = useState<CompanyWhitId[]>([]);
-  const [filteredEmpresas, setFilteredEmpresas] = useState<CompanyWhitId[]>([]);
+  const [empresas, setEmpresas] = useState<CompanyWhithId[]>([]);
+  const [filteredEmpresas, setFilteredEmpresas] = useState<CompanyWhithId[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [selectedCompany, setSelectedCompany] = useState<CompanyWhitId | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<CompanyWhithId | null>(null);
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
@@ -78,7 +77,7 @@ const columns: GridColDef[] = [
     field: 'acciones',
     headerName: 'Acciones',
     flex: 1,
-    renderCell: (params: GridRenderCellParams<CompanyWhitId>) => (
+    renderCell: (params: GridRenderCellParams<CompanyWhithId>) => (
       <>
         <Tooltip title="Editar">
           <IconButton color="primary" onClick={() => { setSelectedCompany(params.row); setEditOpen(true); }}>

@@ -3,7 +3,7 @@ import { Box, Chip, CircularProgress, List, ListItemButton, Stack, Typography } 
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
-import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
+import { PickersDay } from '@mui/x-date-pickers/PickersDay';
 import { es } from 'date-fns/locale'
 import { format, startOfDay } from 'date-fns'
 import { supabase } from '../../../components/lib/supabaseClient.ts';
@@ -87,11 +87,7 @@ export default function BookingWidget({ companyId, staffId, serviceIds, onSelect
   React.useEffect(() => { loadMonthCounts() }, [companyId, staffId, year, month, JSON.stringify(serviceIds)])
   React.useEffect(() => { loadDaySlots() }, [companyId, staffId, dayISO, JSON.stringify(serviceIds)])
 
-const renderDay = (
-  date: Date,
-  _selectedDates: Array<Date | null>,
-  pickersDayProps: PickersDayProps<Date>
-) => {
+const renderDay = ( date: Date, _selected: any, pickersDayProps: any ) => {
   const key = format(date, 'yyyy-MM-dd');
   const count = monthCounts[key] ?? 0;
   const isPast = startOfDay(date) < startOfDay(new Date());
@@ -109,10 +105,11 @@ const renderDay = (
     </Box>
   );
 };
+
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
       <Stack spacing={2}>
-        <DateCalendar<Date> value={day} onChange={(d) => { if (d) setDay(d); }} onMonthChange={(m) => setDay(m)} renderDay={renderDay}/>
+        <DateCalendar value={day} onChange={(d) => { if (d) setDay(d); }} onMonthChange={(m) => setDay(m)} renderDay={renderDay}/>
         {(loadingMonth || loadingSlots) && <CircularProgress size={24} />}
         {error && <Typography color="error" variant="body2">{error}</Typography>}
         {!loadingSlots && slots && (

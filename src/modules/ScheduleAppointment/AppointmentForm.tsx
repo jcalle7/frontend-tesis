@@ -9,8 +9,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import dayjs, { Dayjs } from 'dayjs';
-import { supabase } from '../../components/lib/supabaseClient.ts'; 
-import type { Dayjs } from 'dayjs';
+import { supabase } from '../../components/lib/supabaseClient.ts';
 
 export default function AppointmentForm() {
   const [formData, setFormData] = useState<AppointmentFormData>({
@@ -206,7 +205,11 @@ export default function AppointmentForm() {
         <DateTimePicker
           label="Seleccionar fecha y hora"
           value={dayjs(formData.fechaHora)}
-          onChange={handleDateChange}
+          onChange={(newValue) => {
+            if (newValue) {
+          setFormData(prev => ({ ...prev, fechaHora: newValue.toISOString() }));
+      }
+      }}
         />
       </LocalizationProvider>
 

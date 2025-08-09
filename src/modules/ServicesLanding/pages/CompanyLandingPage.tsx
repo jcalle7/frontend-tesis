@@ -108,7 +108,7 @@ console.log('Cliente encontrado:', clientData, 'Error:', clientError);
     
         if (landingError) console.error('Error en landing:', landingError);
 
-        setLandingData((landing ?? null) as LandingData | null);
+        setLandingData(landing || null);
 
       const { data: serviciosData, error: serviciosError } = await supabase
         .from('services')
@@ -118,7 +118,7 @@ console.log('Cliente encontrado:', clientData, 'Error:', clientError);
         console.log('Servicios cargados:', serviciosData); // <- los servicios que trae
         if (serviciosError) console.error('Error al obtener servicios:', serviciosError);
 
-        setServicios((serviciosData ?? []) as ServicioLanding[]);
+      setServicios(serviciosData || []);
     };
     fetchLanding();
   }, [slug]);

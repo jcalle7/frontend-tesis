@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../components/lib/supabaseClient.ts';
-import {
-  Container, Typography, Card, CardContent,
-  Grid, Chip, CircularProgress
-} from '@mui/material';
+import { Container, Typography, Card, CardContent, Chip, CircularProgress } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import type { ChipProps } from '@mui/material';
 import dayjs from 'dayjs';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';

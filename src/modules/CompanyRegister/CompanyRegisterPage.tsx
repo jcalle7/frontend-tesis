@@ -91,7 +91,7 @@ export default function CompanyRegisterPage() {
     <Box component="form" onSubmit={handleSubmit} sx={formContainerCompany}>
       <Typography variant="h4" sx={TitlePrincipalCompany}>REGISTRAR EMPRESA</Typography>
       
-      {formError && (<CalloutAlert severity="error" title="Error al guardar"> Completa todos los campos obligatorios.</CalloutAlert>)}
+      {formError && (<CalloutAlert severity="error" title="Error al guardar" message="Completa todos los campos obligatorios." />)}
       <TextField label="Nombre de la empresa" name="name" value={form.name} onChange={handleChange} error={formError && form.name.trim() === ''} helperText={formError && form.name.trim() === '' ? 'Completa este campo' : ''}/> 
       <TextField label="Nombre del titular" name="owner_name" value={form.owner_name} onChange={handleChange} error={formError && form.name.trim() === ''} helperText={formError && form.name.trim() === '' ? 'Completa este campo' : ''}/>
       <TextField label="RUC" name="ruc" value={form.ruc} onChange={handleChange} error={formError && form.name.trim() === ''} helperText={formError && form.name.trim() === '' ? 'Completa este campo' : ''}/>
