@@ -34,11 +34,9 @@ export default function CompanyListPage() {
   const fetchEmpresas = async () => {
   
     const user = await supabase.auth.getUser();
-    console.log('🧠 User autenticado:', user.data?.user?.id);
 
     const { data, error } = await supabase.from('companies').select('*');
     
-    console.log('🔍 Empresas obtenidas:', data); 
     console.error('❌ Error al obtener empresas:', error);
 
       if (error) {

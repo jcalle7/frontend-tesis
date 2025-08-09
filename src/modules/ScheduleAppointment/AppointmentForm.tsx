@@ -30,7 +30,6 @@ export default function AppointmentForm() {
   useEffect(() => {
     const fetchAll = async () => {
       const { data: user } = await supabase.auth.getUser();
-      console.log('👤 Usuario actual:', user?.user?.id);
       const userId = user?.user?.id;
       if (!userId) return;
 
@@ -39,7 +38,6 @@ export default function AppointmentForm() {
         .select('company_id')
         .eq('user_id', userId)
         .single();
-        console.log('🔍 Resultado de consulta a company_users:', empresaData);
 
       if (empresaData?.company_id) {
         const companyId = empresaData.company_id;
@@ -103,17 +101,6 @@ export default function AppointmentForm() {
         setLoading(false);
         return;
       }
-
-      console.log('Datos para insertar en appointments:');
-      
-      console.log({
-        client_id: cliente,
-        company_id: companyId,
-        phone: telefono,
-        date: dayjs(fechaHora).format('YYYY-MM-DD'),
-        time: dayjs(fechaHora).format('HH:mm:ss'),
-        status: 'pendiente',
-      });
 
       const { data: appointment, error: errorCita } = await supabase
         .from('appointments')

@@ -70,7 +70,6 @@ export default function ServiceManager() {
     setCompanyId(companyData.company_id);
 
     if (companyData.company_id) {
-    console.log("company_id desde company_users:", companyData.company_id);
     const { data: companyDetails, error: slugError } = await supabase
     .from('companies')
     .select('id, slug, name')
@@ -89,7 +88,6 @@ export default function ServiceManager() {
     if (companyDetails?.slug) {
       setCompanySlug(companyDetails.slug);
 
-      console.log('✅ Slug de la empresa:', companyDetails.slug);
     } else {
       console.warn('⚠️ La empresa no tiene slug registrado en Supabase.');
     }

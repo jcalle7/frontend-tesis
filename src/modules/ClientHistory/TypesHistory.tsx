@@ -5,7 +5,7 @@ export interface ClientHistory {
     citasPasadas: number;
     servicios: string[];
     alertaSalud: boolean;
-    detalleAlerta?: string; // Ejemplo: "Alergia a acetona"
+    detalleAlerta?: string; 
 
   }
   

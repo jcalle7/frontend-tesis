@@ -35,7 +35,6 @@ export default function LoginClient() {
       email,
       password,
     });
-    console.log("✅ Sesión iniciada:", _data);
 
 
     if (error) {
@@ -45,8 +44,6 @@ export default function LoginClient() {
 
     const sessionResult = await supabase.auth.getSession();
     const userEmail = sessionResult.data.session?.user.email;
-
-    console.log("📧 Email autenticado:", userEmail);
 
     if (!userEmail) {
       setErrorMsg('⚠️ No se pudo obtener la sesión del usuario.');
@@ -60,9 +57,6 @@ export default function LoginClient() {
       .eq('email', userEmail)
       .limit(1)
       .maybeSingle();
-
-      console.log("👤 CLIENT:", client);
-      console.log("⚠️ ERROR CLIENT:", clientError);
 
     if (clientError || !client) {
       setErrorMsg('No tienes acceso como cliente.');

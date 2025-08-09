@@ -31,7 +31,7 @@ export default function AppointmentTable({ rows, onAccept, onCancel, onSendForm 
 
       const label = estado ? estado.charAt(0).toUpperCase() + estado.slice(1) : '—';
 
-        return <Chip label={value} color={color} />;
+        return <Chip label={label} color={color} />;
       },
     },
     { field: 'fecha', headerName: 'Fecha', flex: 1 },

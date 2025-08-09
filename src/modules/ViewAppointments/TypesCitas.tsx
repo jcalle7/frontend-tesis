@@ -6,7 +6,7 @@ export interface AppointmentData {
   estado: EstadoCita;
   fecha: string;
   hora: string;
-  telefono?: string; // necesario para WhatsApp
+  telefono?: string; 
   clientId: string;
   comprobante?: string | null;
 }

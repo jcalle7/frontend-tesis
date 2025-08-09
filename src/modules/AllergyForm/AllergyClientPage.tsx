@@ -11,7 +11,7 @@ export default function AllergyClientPage() {
 
   const handleAfterSave = () => {
     setOpenCreate(false);
-    setRefresh(r => !r); // Esto forzará el refresh en la tabla
+    setRefresh(r => !r); 
   };
 
   return (

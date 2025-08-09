@@ -13,8 +13,8 @@ export interface ServiceData {
 interface ServiceRow {
   id: number;
   name: string;
-  price: number  |  string; // Puede ser string si se usa BigInt en la base de datos
-  duration_minutes: number  |  string; // Puede ser string si se usa BigInt en la base de datos
+  price: number  |  string; 
+  duration_minutes: number  |  string; 
   description: string  |  null;
   image_url?: string;
 }

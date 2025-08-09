@@ -17,7 +17,6 @@ async function fetchClientHistory(): Promise<ClientHistory[]> {
     .single();
 
   const companyId = empresaData?.company_id;
-  console.log("🔍 Empresa del usuario:", companyId);
 
   if (!companyId) return [];
 
@@ -26,15 +25,11 @@ async function fetchClientHistory(): Promise<ClientHistory[]> {
     .select('*')
     .eq('company_id', companyId);
 
-  console.log("🧪 Resultado de consulta a 'clients':", clients, "para company_id:", companyId);
-  console.log("📋 Clientes encontrados:", clients);
-
   if (!clients) return [];
 
   const clientHistoryList: ClientHistory[] = [];
 
   for (const client of clients) {
-    console.log("🧍 Procesando cliente:", client);
 
     const { data: appointments } = await supabase
       .from('appointments')
@@ -42,20 +37,15 @@ async function fetchClientHistory(): Promise<ClientHistory[]> {
       .eq('client_id', client.id)
       .eq('company_id', companyId);
 
-    console.log("📅 Citas para el cliente:", appointments);
-
     const citasValidas = appointments ?? [];
 
     const serviciosSet = new Set<string>();
     for (const cita of citasValidas) {
-      console.log("🔗 Buscando servicios de cita:", cita.id);
 
       const { data: serviciosRelacionados } = await supabase
         .from('appointment_services')
         .select('service_id')
         .eq('appointment_id', cita.id);
-
-      console.log("🧾 Servicios relacionados:", serviciosRelacionados);
 
       const ids = serviciosRelacionados?.map(r => r.service_id) ?? [];
 
@@ -65,13 +55,6 @@ async function fetchClientHistory(): Promise<ClientHistory[]> {
           .select('id, name')
           .in('id', ids)
           .eq('company_id', companyId);
-
-        if (error) {
-          console.error("🚨 Error al obtener nombres de servicios:", error);
-        }
-
-          console.log("🧠 IDs a buscar en services:", ids);
-          console.log("📦 Resultado completo de servicios:", serviciosNombres);
 
         serviciosNombres?.forEach(s => {
           if (s?.name) serviciosSet.add(s.name);
@@ -89,12 +72,9 @@ async function fetchClientHistory(): Promise<ClientHistory[]> {
       detalleAlerta: client.comments ?? '',
     };
 
-    console.log("✅ Cliente agregado al historial:", clienteFinal);
-
     clientHistoryList.push(clienteFinal);
   }
 
-  console.log("📊 Resultado final:", clientHistoryList);
   return clientHistoryList;
 }
 

@@ -23,7 +23,7 @@ export default function AppointmentListPage() {
 const handleAccept = async (id: string) => {
   const { error } = await supabase
     .from("appointments")
-    .update({ status: "aceptada" }) // minúscula, como en tu BD
+    .update({ status: "aceptada" }) 
     .eq("id", id);
 
   if (!error) {

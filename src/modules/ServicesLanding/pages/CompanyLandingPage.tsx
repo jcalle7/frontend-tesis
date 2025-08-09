@@ -115,7 +115,6 @@ console.log('Cliente encontrado:', clientData, 'Error:', clientError);
         .select('*')
         .eq('company_id', empresa.id);
 
-        console.log('Servicios cargados:', serviciosData); // <- los servicios que trae
         if (serviciosError) console.error('Error al obtener servicios:', serviciosError);
 
       setServicios(serviciosData || []);
@@ -184,16 +183,11 @@ if (rpcError || !citaId) {
   return;
 }
 
-
   // 6. Insertar en appointment_services
 const serviceIds: string[] = selectedServicios.map((s) => {
   const maybeId = typeof s?.id === 'object' ? s?.id?.id : s?.id;
   return typeof maybeId === 'string' ? maybeId : '';
 }).filter((id) => /^[0-9a-fA-F-]{36}$/.test(id));
-
-// Validaciones opcionales
-console.log("Enviando serviceIds:", serviceIds);
-console.log("Todos válidos:", serviceIds.every(id => /^[0-9a-fA-F-]{36}$/.test(id)));
 
 // Extraer el ID real de la cita
 const citaUuid = Array.isArray(citaId) && citaId.length > 0

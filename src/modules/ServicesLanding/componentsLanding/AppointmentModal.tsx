@@ -41,7 +41,7 @@ const ready = Boolean(companyId && staffId && serviceIds.length > 0);
       alert('Selecciona la fecha y hora');
       return;
     }
-    setConfirmOpen(true); // abrir modal de advertencia
+    setConfirmOpen(true); 
   };
   
   return (
