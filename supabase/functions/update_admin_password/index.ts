@@ -2,15 +2,36 @@
 import { serve } from "https://deno.land/std@0.181.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "http://localhost:5173", 
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
+const ALLOWED_ORIGINS = [
+  "http://localhost:5173",
+  "https://frontend-tesis-one.vercel.app",
+];
+function isAllowedOrigin(origin: string) {
+  try {
+    const url = new URL(origin);
+    return ALLOWED_ORIGINS.includes(origin) || url.hostname.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+}
+function buildCors(origin: string) {
+  const allow = isAllowedOrigin(origin) ? origin : "https://frontend-tesis-one.vercel.app";
+  return {
+    "Access-Control-Allow-Origin": allow,
+    "Vary": "Origin",
+    "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Max-Age": "86400",
+    "Content-Type": "application/json",
+  };
+}
 
 serve(async (req) => {
+  
+  const origin = req.headers.get("origin") ?? "";
+
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { headers: buildCors(origin) });
   }
 
   try {
@@ -19,7 +40,7 @@ serve(async (req) => {
     if (!company_id || !new_password) {
       return new Response(JSON.stringify({ error: "Faltan parámetros." }), {
         status: 400,
-        headers: corsHeaders,
+        headers:  buildCors(origin),
       });
     }
 
@@ -42,7 +63,7 @@ serve(async (req) => {
     if (relError || !relation?.user_id) {
       return new Response(JSON.stringify({ error: "Admin no encontrado." }), {
         status: 404,
-        headers: corsHeaders,
+        headers:  buildCors(origin),
       });
     }
 
@@ -60,7 +81,7 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ message: "✅ Contraseña actualizada correctamente." }),
-      { status: 200, headers: corsHeaders }
+      { status: 200, headers:  buildCors(origin) }
     );
   } catch (err) {
     const message =
@@ -70,7 +91,7 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ error: message }), {
       status: 500,
-      headers: corsHeaders,
+      headers:  buildCors(origin),
     });
   }
 });

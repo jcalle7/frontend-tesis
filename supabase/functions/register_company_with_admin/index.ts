@@ -3,18 +3,37 @@ import { serve } from "https://deno.land/std@0.181.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import type { AdminUserAttributes } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "http://localhost:5173",
-  "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
+const ALLOWED_ORIGINS = [
+  "http://localhost:5173",
+  "https://frontend-tesis-one.vercel.app",
+];
+function isAllowedOrigin(origin: string) {
+  try {
+    const url = new URL(origin);
+    return ALLOWED_ORIGINS.includes(origin) || url.hostname.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+}
+function buildCors(origin: string) {
+  const allow = isAllowedOrigin(origin) ? origin : "https://frontend-tesis-one.vercel.app";
+  return {
+    "Access-Control-Allow-Origin": allow,
+    "Vary": "Origin",
+    "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Max-Age": "86400",
+    "Content-Type": "application/json",
+  };
+}
   
 serve(async (req) => {
-    // DEBUG: Mostrar si las variables están llegando bien
+  const origin = req.headers.get("origin") ?? "";
+
   console.log("SB_URL is:", Deno.env.get("SB_URL"));
   console.log("SB_SERVICE_ROLE is:", Deno.env.get("SB_SERVICE_ROLE"));
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { headers: buildCors(origin) });
   } 
 
   try {
@@ -32,12 +51,16 @@ serve(async (req) => {
       .or(`ruc.eq.${company.ruc},email.eq.${company.email}`)
       .limit(1);
 
-    if (dupError) throw dupError;
+    if (dupError)  {
+      return new Response(JSON.stringify({ error: dupError.message }), {
+        status: 400, headers: buildCors(origin),
+      });
+    }
 
     if (existing && existing.length > 0) {
       return new Response(JSON.stringify({ error: "❌ Ya existe una empresa con ese RUC o email." }), {
         status: 409,
-        headers: corsHeaders
+        headers:  buildCors(origin),
       });
     }
     
@@ -53,7 +76,7 @@ serve(async (req) => {
         error: userError?.message || "No se creó el usuario."
       }), {
         status: 400,
-        headers: corsHeaders
+        headers: buildCors(origin),
       });
     }
     
@@ -79,7 +102,7 @@ await supabase.auth.admin.updateUserById(
       .insert([{        
         name: company.name,
         slug: company.slug, 
-        owner_name: company.Ownername,
+        owner_name: company.owner_name,
         ruc: company.ruc,
         phone: company.phone,
         email: company.email,
@@ -90,7 +113,7 @@ await supabase.auth.admin.updateUserById(
     if (companyError) {
       return new Response(JSON.stringify({ error: companyError.message }), {
         status: 400,
-        headers: corsHeaders
+        headers: buildCors(origin),
       });
     }
 
@@ -105,7 +128,7 @@ await supabase.auth.admin.updateUserById(
     if (relationError) {
       return new Response(JSON.stringify({ error: relationError.message }), {
         status: 400,
-        headers: corsHeaders
+        headers: buildCors(origin),
       });
     }
 
@@ -113,7 +136,7 @@ await supabase.auth.admin.updateUserById(
       message: "✅ Empresa y admin creados"
     }), {
       status: 200,
-      headers: corsHeaders
+      headers: buildCors(origin),
     });
   } catch (err) {
     const message =
@@ -123,7 +146,7 @@ await supabase.auth.admin.updateUserById(
 
     return new Response(JSON.stringify({ error: "💥 Error interno: " + message }), {
       status: 500,
-      headers: corsHeaders
+      headers: buildCors(origin),
     });
   }
 });
