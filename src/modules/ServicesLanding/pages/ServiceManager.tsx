@@ -17,6 +17,22 @@ const Transition = React.forwardRef<HTMLDivElement, TransitionProps & { children
   }
 );
 
+type LandingState = {
+  cover_url: string;
+  title: string;
+  facebook_url: string;
+  instagram_url: string;
+  tiktok_url: string;
+  phone: string;
+  address: string;
+  email: string;
+  bank_account: string;
+  cedula: string;
+  whatsapp_url: string;
+  whatsapp_number: string;
+  map_url: string;
+};
+
 export default function ServiceManager() {
   const { services, createOrUpdateService, deleteService } = useServices();
 
@@ -30,7 +46,7 @@ export default function ServiceManager() {
     imagen: '',
   });
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 5 });
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 });
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
@@ -48,7 +64,12 @@ export default function ServiceManager() {
     phone: '',
     address: '',
     email: '',
-    bank_account: ''
+    bank_account: '',
+    cedula: '',
+    whatsapp_url: '',
+    whatsapp_number: '',
+    map_url: '',
+
   });
   const [initialLanding, setInitialLanding] = useState<typeof landingForm | null>(null);
   const [companyId, setCompanyId] = useState<string | null>(null);
@@ -109,8 +130,12 @@ export default function ServiceManager() {
         phone: existingLanding.phone ?? '',
         address: existingLanding.address ?? '',
         email: existingLanding.email ?? '',
-        bank_account: existingLanding.bank_account ?? ''
-    };
+        bank_account: existingLanding.bank_account ?? '',
+        cedula: existingLanding?.cedula ?? '',
+        whatsapp_url: existingLanding?.whatsapp_url ?? '',
+        whatsapp_number: existingLanding?.whatsapp_number ?? '',
+        map_url: existingLanding?.map_url ?? '',
+      };
 
     setLandingForm(fullLanding);
     setInitialLanding(fullLanding);
@@ -157,7 +182,11 @@ const handleLandingSubmit = async () => {
     phone: landingForm.phone,
     address: landingForm.address,
     email: landingForm.email,
-    bank_account: landingForm.bank_account
+    bank_account: landingForm.bank_account,
+    cedula: landingForm.cedula,
+    whatsapp_url: landingForm.whatsapp_url,
+    whatsapp_number: landingForm.whatsapp_number,
+    map_url: landingForm.map_url,
   };
 
   if (existing) {

@@ -1,5 +1,5 @@
 import { Typography, Box } from '@mui/material';
-import ClientForm from "./ClientForm.tsx";
+import ClientForm from "../RegisterClient/ClientForm";
 import { containerStyles, titleStyles } from "./Styles/RegisterClientPage.styles.ts";
 
 export default function RegisterClientPage() {

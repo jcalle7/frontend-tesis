@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, TextField, Button, Typography } from '@mui/material';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import MuiLink from '@mui/material/Link';
 
 interface Props {
   formData: {
@@ -13,6 +14,10 @@ interface Props {
     address: string;
     email: string;
     bank_account: string;
+    cedula?: string;
+    whatsapp_url?: string;
+    whatsapp_number?: string;
+    map_url?: string;
   };
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onImageChange: (file: File) => void;
@@ -21,6 +26,20 @@ interface Props {
 }
 
 export default function LandingForm({ formData, onChange, onImageChange, onSubmit, disabled }: Props) {
+    const waLink =
+    formData.whatsapp_url && formData.whatsapp_url.trim().length > 0
+      ? formData.whatsapp_url
+      : (formData.whatsapp_number || '').replace(/\D/g, '').length
+      ? `https://wa.me/${(formData.whatsapp_number || '').replace(/\D/g, '')}`
+      : '';
+
+  const mapSrc =
+    (formData.map_url && formData.map_url.trim().length > 0)
+      ? formData.map_url
+      : (formData.address && formData.address.trim().length > 0)
+      ? `https://www.google.com/maps?q=${encodeURIComponent(formData.address)}&output=embed`
+      : '';
+
   return (
     <Box mt={5} p={3} border="1px solid #ccc" borderRadius={2}>
       <Typography variant="h6" gutterBottom>Configuración de Landing Page</Typography>
@@ -33,6 +52,48 @@ export default function LandingForm({ formData, onChange, onImageChange, onSubmi
       <TextField fullWidth label="Dirección" name="address" value={formData.address} onChange={onChange} margin="normal" />
       <TextField fullWidth label="Email" name="email" value={formData.email} onChange={onChange} margin="normal" />
       <TextField fullWidth label="Cuenta bancaria" name="bank_account" value={formData.bank_account} onChange={onChange} margin="normal" />
+      <TextField
+        fullWidth
+        label="Cédula/RUC (para transferencias)"
+        name="cedula"
+        value={formData.cedula || ''}
+        onChange={onChange}
+        inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+        margin="normal"
+      />
+
+      <TextField
+        fullWidth
+        label="WhatsApp URL (opcional)"
+        name="whatsapp_url"
+        placeholder="https://wa.me/593999999999"
+        value={formData.whatsapp_url || ''}
+        onChange={onChange}
+        margin="normal"
+        helperText="Si usas este campo, se ignorará el 'WhatsApp (solo número)'."
+      />
+
+      <TextField
+        fullWidth
+        label="WhatsApp (solo número)"
+        name="whatsapp_number"
+        placeholder="+593999999999"
+        value={formData.whatsapp_number || ''}
+        onChange={onChange}
+        margin="normal"
+        helperText="Si completas este campo y no hay URL, se generará automáticamente el enlace wa.me."
+      />
+
+      <TextField
+        fullWidth
+        label="URL de mapa (opcional)"
+        name="map_url"
+        placeholder="https://www.google.com/maps/embed?..."
+        value={formData.map_url || ''}
+        onChange={onChange}
+        margin="normal"
+        helperText="Si está vacío, se usará la Dirección para generar el mapa."
+      />
 
       <Button
         component="label"
@@ -67,6 +128,30 @@ export default function LandingForm({ formData, onChange, onImageChange, onSubmi
             alt="Portada"
             style={{ width: '100%', maxHeight: 300, objectFit: 'cover', borderRadius: 8 }}
           />
+        </Box>
+      )}
+
+      {(waLink || mapSrc) && (
+        <Box mt={2}>
+          {waLink && (
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              Enlace de WhatsApp:{''}
+              <MuiLink href={waLink} target="_blank" rel="noopener"> {waLink} </MuiLink>
+            </Typography>
+          )}
+          {mapSrc && (
+            <Box sx={{ width: '100%', height: 240 }}>
+              <iframe
+                title="Vista previa mapa"
+                src={mapSrc}
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </Box>
+          )}
         </Box>
       )}
 

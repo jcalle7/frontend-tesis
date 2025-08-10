@@ -5,6 +5,16 @@ import { ClientHistory } from "./TypesHistory.tsx";
 import { useEffect, useState } from 'react';
 import { supabase } from '../../components/lib/supabaseClient.ts';
 
+const norm = (s: string) =>
+  s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+const hasAllergy = (comment?: string) => {
+  if (!comment) return false;
+  const t = norm(comment);
+  
+  return t.includes('alerg');
+};
+
 async function fetchClientHistory(): Promise<ClientHistory[]> {
   const { data: user } = await supabase.auth.getUser();
   const userId = user?.user?.id;
@@ -68,7 +78,7 @@ async function fetchClientHistory(): Promise<ClientHistory[]> {
       telefono: client.phone,
       citasPasadas: citasValidas.length,
       servicios: Array.from(serviciosSet),
-      alertaSalud: client.comments?.toLowerCase().includes('alergia') ?? false,
+      alertaSalud: hasAllergy(client.comments),     // <- aquí
       detalleAlerta: client.comments ?? '',
     };
 
@@ -96,7 +106,7 @@ export default function ClientHistoryPage() {
     const term = searchTerm.toLowerCase();
     const filtered = data.filter(client =>
       client.nombre.toLowerCase().includes(term) ||
-      client.telefono.toLowerCase().includes(term)
+      (client.telefono ?? '').toLowerCase().includes(term)
     );
     setFilteredData(filtered);
   }, [searchTerm, data]);

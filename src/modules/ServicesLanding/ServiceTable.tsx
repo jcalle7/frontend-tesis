@@ -3,6 +3,7 @@ import { IconButton, Box } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { ServiceData } from '../ServicesLanding/TypesServices.tsx';
+import { useEffect } from 'react';
 
 interface Props {
   services: ServiceData[];

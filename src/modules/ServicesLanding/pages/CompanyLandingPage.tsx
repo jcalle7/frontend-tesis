@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../../../components/lib/supabaseClient.ts';
-import { FaFacebook, FaInstagram, FaTiktok } from 'react-icons/fa';
+import { FaFacebook, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import { Phone, Email, LocationOn } from '@mui/icons-material';
 import ServiceCardFlip from '../../ServicesLanding/componentsLanding/ServiceCardFlip';
 import '../../../modules/ServicesLanding/pages/landingStyles/landingStyles.css';
@@ -19,6 +19,10 @@ type LandingData = {
   facebook_url?: string;
   instagram_url?: string;
   tiktok_url?: string;
+  cedula?: string;              
+  whatsapp_number?: string;     
+  whatsapp_url?: string;        
+  map_url?: string;             
 };
 
 type ServicioLanding = {
@@ -54,9 +58,8 @@ export default function CompanyLandingPage() {
       return;
     }
 
-    // Buscar en tu tabla personalizada de usuarios/clientes
     const { data: clientData, error: clientError } = await supabase
-      .from('clients') // cambia según tu tabla real
+      .from('clients') 
       .select('first_name, last_name, user_id, id' )
       .eq('user_id', userData.user.id)
       .maybeSingle();
@@ -87,7 +90,6 @@ console.log('Cliente encontrado:', clientData, 'Error:', clientError);
       if (!empresa) return;
 
       setEmpresaNombre(empresa.name);
-      console.log('Empresa encontrada:', empresa);
 
       const companyId = empresa.id;
       const { data: staffRow } = await supabase
@@ -96,7 +98,6 @@ console.log('Cliente encontrado:', clientData, 'Error:', clientError);
       .eq('company_id', companyId)
       .maybeSingle();
 
-      // guarda en estado
       setCompanyId(companyId);
       setStaffId(staffRow?.id ?? '');
 
@@ -216,6 +217,18 @@ if (serviciosError) {
   setShowAgendar(false);
 };
 
+  const waLink =
+    landingData?.whatsapp_url ||
+    (landingData?.whatsapp_number
+      ? `https://wa.me/${landingData.whatsapp_number.replace(/\D/g, '')}`
+      : undefined);
+
+  const mapSrc =
+    landingData?.map_url ||
+    (landingData?.address
+      ? `https://www.google.com/maps?q=${encodeURIComponent(landingData.address)}&output=embed`
+      : undefined);
+
   return (
     <div className="min-h-screen">
       <Navbar userName={userName || 'Cliente'} companyName={empresaNombre || 'Nombre empresa'}   carrito={carrito}
@@ -269,15 +282,19 @@ if (serviciosError) {
       </section>
 
       {/* Agendamiento */}
-        <AppointmentModal
-          open={showAgendar}
-          onClose={() => { setShowAgendar(false); setSelectedServicios([]); }}
-          onConfirm={handleAgendarTurno} // ← NO lo toco
-          selectedServices={selectedServicios}
-          bankAccount={landingData?.bank_account || ''}
-          companyId={companyId}  
-          staffId={staffId}
-        />
+      <AppointmentModal
+        open={showAgendar}
+        onClose={() => {
+          setShowAgendar(false);
+          setSelectedServicios([]);
+        }}
+        onConfirm={handleAgendarTurno}
+        selectedServices={selectedServicios}
+        bankAccount={landingData?.bank_account || ''}
+        companyId={companyId}
+        staffId={staffId}
+        idNumber={landingData?.cedula || ''}
+      />
 
       {/* Contacto */}
       {(landingData?.phone || landingData?.email || landingData?.address) && (
@@ -287,6 +304,25 @@ if (serviciosError) {
             {landingData.phone && <p><Phone fontSize="small" /> {landingData.phone}</p>}
             {landingData.email && <p><Email fontSize="small" /> {landingData.email}</p>}
             {landingData.address && <p><LocationOn fontSize="small" /> {landingData.address}</p>}
+          </div>
+        </section>
+      )}
+
+      {/* Mapa */}
+      {mapSrc && (
+        <section id="ubicacion" className="mt-4">
+          <h3 className="text-xl font-semibold mb-2">¿Dónde estamos?</h3>
+          <div style={{ width: '100%', height: 360 }}>
+            <iframe
+              title="Ubicación"
+              src={mapSrc}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+            />
           </div>
         </section>
       )}
@@ -310,6 +346,9 @@ if (serviciosError) {
               <a href={landingData.tiktok_url} target="_blank" rel="noopener noreferrer">
                 <FaTiktok />
               </a>
+            )}
+            {waLink && (
+              <a href={waLink} target="_blank" rel="noopener noreferrer" title="WhatsApp"><FaWhatsapp /></a>
             )}
           </div>
         </section>

@@ -13,6 +13,7 @@ interface AppointmentModalProps {
   bankAccount: string;
   companyId: string;
   staffId: string;
+  idNumber?: string; 
 }
 
 export default function AppointmentModal({
@@ -22,7 +23,8 @@ export default function AppointmentModal({
   selectedServices,
   bankAccount,
   companyId,
-  staffId
+  staffId,
+  idNumber
 }: AppointmentModalProps) {
   const [fechaISO, setFechaISO] = useState<string | null>(null);
   const [comprobante, setComprobante] = useState<File | null>(null);
@@ -53,7 +55,8 @@ const ready = Boolean(companyId && staffId && serviceIds.length > 0);
             Debes depositar el 50% del servicio al siguiente número de cuenta:
           </Typography>
           <Alert severity="info" sx={{ mb: 2, fontWeight: 500 }}>
-            {bankAccount || 'Cuenta bancaria no disponible'}
+            {bankAccount && <DialogContentText>Cuenta: {bankAccount}</DialogContentText>}
+            {idNumber && <DialogContentText>Cédula/RUC: {idNumber}</DialogContentText>}
           </Alert>
 
           <Stack spacing={2}>

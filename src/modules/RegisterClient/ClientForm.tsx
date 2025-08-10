@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Snackbar, TextField } from '@mui/material';
+import { Alert, Box, Button, Snackbar, TextField, Grid, MenuItem } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import ListIcon from '@mui/icons-material/List';
 import { useState, useEffect } from 'react';
@@ -10,6 +10,23 @@ import { useNavigate } from 'react-router-dom';
 import { InputAdornment, IconButton } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import React from "react";
+
+const COUNTRY_CODES = [
+  { code: 'EC', name: 'Ecuador', dial: '+593' },
+];
+
+const flagEmoji = (iso: string) =>
+  iso.toUpperCase().replace(/./g, c => String.fromCodePoint(127397 + c.charCodeAt(0)));
+
+const toE164 = (dial: string, local: string) => {
+  const digits = local.replace(/\D/g, '');
+  const normalizedLocal = digits.replace(/^0+/, '');
+  return `${dial}${normalizedLocal}`;
+};
+
+const isValidE164Digits = (digits: string) => {
+  return digits.length >= 8 && digits.length <= 15;
+};
 
 const initialForm: ClientFormData = {
   nombres: '',
@@ -24,6 +41,11 @@ const initialForm: ClientFormData = {
 export default function ClientForm() {
   const [formData, setFormData] = useState<ClientFormData>(initialForm);
   const [companyId, setCompanyId] = useState<string | null>(null);
+  const [country, setCountry] = useState(COUNTRY_CODES.find(c => c.code === 'EC')!);
+  const [localPhone, setLocalPhone] = useState(''); 
+  const e164Preview = toE164(country.dial, localPhone);
+  const e164Digits = e164Preview.replace(/\D/g, '');
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
@@ -35,7 +57,7 @@ export default function ClientForm() {
     (async () => {
       const { data: user } = await supabase.auth.getUser();
       if (!user?.user?.id) return;
-      const { data, error: _error } = await supabase
+      const { data } = await supabase
         .from('company_users')
         .select('company_id')
         .eq('user_id', user.user.id)
@@ -48,6 +70,14 @@ export default function ClientForm() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+    const handleLocalPhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    
+    const onlyDigits = e.target.value.replace(/[^\d]/g, '');
+    setLocalPhone(onlyDigits);
+    const digitsTotal = toE164(country.dial, onlyDigits).replace(/\D/g, '');
+    setPhoneError(isValidE164Digits(digitsTotal) ? null : 'Número inválido. Revisa longitud.');
   };
 
 const handleSubmit = async (e: React.FormEvent) => {
@@ -68,6 +98,13 @@ const handleSubmit = async (e: React.FormEvent) => {
     return;
   }
 
+  const phoneE164 = toE164(country.dial, localPhone);
+  const digits = phoneE164.replace(/\D/g, '');
+  if (!isValidE164Digits(digits)) {
+    setPhoneError('Número inválido. Debe quedar en formato internacional, p. ej. +593999999999.');
+    return;
+  }
+
   try {
         //Obtener el token del usuario logueado
     const { data: sessionData } = await supabase.auth.getSession();
@@ -85,7 +122,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         client: {
           first_name: formData.nombres,
           last_name: formData.apellidos,
-          phone: formData.telefono,
+          phone: phoneE164,
           email: formData.correo,
           comments: formData.comentarios || '',
           company_id: companyId,
@@ -113,7 +150,43 @@ const handleSubmit = async (e: React.FormEvent) => {
     <Box component="form" onSubmit={handleSubmit} sx={formContainer}>
       <TextField required label="Nombres" name="nombres" value={formData.nombres} onChange={handleChange} />
       <TextField required label="Apellidos" name="apellidos" value={formData.apellidos} onChange={handleChange} />
-      <TextField required label="Teléfono" name="telefono" value={formData.telefono} onChange={handleChange} />
+      <Grid container spacing={2}>
+        <Grid size={{xs: 12, sm: 4}}>
+          <TextField
+            select
+            fullWidth
+            label="País"
+            value={country.code}
+            onChange={(e) => {
+              const next = COUNTRY_CODES.find(c => c.code === e.target.value)!;
+              setCountry(next);
+              // revalida con el nuevo código
+              const digitsTotal = toE164(next.dial, localPhone).replace(/\D/g, '');
+              setPhoneError(isValidE164Digits(digitsTotal) ? null : 'Número inválido. Revisa longitud.');
+            }}
+          >
+            {COUNTRY_CODES.map((c) => (
+              <MenuItem key={c.code} value={c.code}>
+                {flagEmoji(c.code)} {c.name} ({c.dial})
+              </MenuItem>
+            ))}
+          </TextField>
+
+        </Grid>
+        <Grid size={{xs: 12, sm: 8}}>
+          <TextField
+            required
+            fullWidth
+            label="Teléfono (solo números)"
+            value={localPhone}
+            onChange={handleLocalPhoneChange}
+            placeholder="Ej: 0999999999"
+            error={!!phoneError}
+            helperText={phoneError ? phoneError : `Se guardará como ${e164Preview}`}
+          />
+        </Grid>
+      </Grid>
+
       <TextField required label="Correo" name="correo" value={formData.correo} onChange={handleChange} />
       <TextField
       required

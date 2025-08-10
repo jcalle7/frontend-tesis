@@ -20,6 +20,8 @@ import FillFormPage from '../modules/ViewAppointments/FillFormPage';
 import FormSubmissionsTable from "../modules/ViewAppointments/FormSubmissionsTable";
 import CompanyListPage from "../modules/CompanyRegister/CompanyListPage";
 import ClientsAppointments from '../modules/ServicesLanding/pages/ClientAppointments'; 
+import HomeDashboard from '../modules/Dashboard/HomeDashboard';
+import DashboardSwitcher from "../modules/Dashboard/DashboardSwitcher";
 
 export const router = createBrowserRouter([
   {
@@ -69,8 +71,9 @@ export const router = createBrowserRouter([
   children: [
     {
       index: true,
-      element: <div style={{ padding: '5rem' }}>Bienvenido al panel administrativo</div>,
+      element:  <DashboardSwitcher />,
     },
+    { path: 'inicio', element: <DashboardSwitcher /> }, 
     { path: 'register-client', element: <RegisterClientPage /> },
     { path: 'history-client', element: <ClientHistoryPage /> },
     { path: 'services', element: <ServiceManager /> },
