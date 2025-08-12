@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   Box, Paper, Typography, Chip, List, ListItem, ListItemText,
-  Divider, CircularProgress, Alert
+  Divider, CircularProgress, Alert, Button
 } from '@mui/material';
 import PeopleAltOutlined from '@mui/icons-material/PeopleAltOutlined';
 import BuildOutlined from '@mui/icons-material/BuildOutlined';
@@ -20,7 +20,6 @@ type Appointment = {
   client_id: string; phone?: string; company_id: string;
 };
 
-// Convierte "vanesa pérez" -> "Vanesa Pérez"
 const toTitleWords = (s: string) =>
   (s || '')
     .replace(/[._-]/g, ' ')
@@ -46,11 +45,26 @@ export default function HomeDashboard() {
   const [topServices, setTopServices] = useState<{ name: string; count: number }[]>([]);
   const [upcoming, setUpcoming] = useState<Appointment[]>([]);
 
-  // Fechas helper
+
   const todayStr = dayjs().format('YYYY-MM-DD');
   const weekAgoStr = dayjs().subtract(7, 'day').format('YYYY-MM-DD');
   const monthStartStr = dayjs().startOf('month').format('YYYY-MM-DD');
   const monthEndStr = dayjs().endOf('month').format('YYYY-MM-DD');
+
+  const finishFromHome = async (apptId: string) => {
+    try {
+      await supabase.from('appointments')
+        .update({ status: 'terminada' })
+        .eq('id', apptId)
+        .eq('company_id', companyId as string);
+
+      // remover de próximas y del conjunto del mes (para KPIs)
+      setUpcoming(prev => prev.filter(a => a.id !== apptId));
+      setMonthAppointments(prev => prev.filter(a => a.id !== apptId));
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -161,20 +175,17 @@ export default function HomeDashboard() {
     })();
   }, []);
 
-  // Cálculos rápidos
   const totalClients = clients.length;
   const activeServices = services.filter(s => (s as any).is_active !== false).length; // si no hay flag, cuenta todos
   const monthCount = monthAppointments.length;
   const weekCount = monthAppointments.filter(a => a.date >= weekAgoStr).length;
   const dayCount = monthAppointments.filter(a => a.date === todayStr).length;
 
-  // Mapa cliente->nombre para próximas
   const clientName = (id: string) => {
     const c = clients.find(x => x.id === id);
     return c ? `${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() || 'Cliente' : 'Cliente';
   };
 
-  // Saludo (prioriza titular de empresa → usuario → correo)
   const greetingName = (() => {
     const raw = (ownerName || userName || (userEmail.split('@')[0] ?? 'Administrador')).trim();
     return toTitleWords(raw);
@@ -200,7 +211,7 @@ export default function HomeDashboard() {
         sx={{
           display: 'grid',
           gap: 2,
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
         }}
       >
         <StatCard
@@ -274,15 +285,24 @@ export default function HomeDashboard() {
                 const when = `${dayjs(a.date).format('DD/MM/YYYY')} ${a.time.slice(0, 5)}`;
                 return (
                   <Box key={a.id}>
-                    <ListItem
-                      secondaryAction={
-                        <Chip
-                          size="small"
-                          color={a.status === 'aceptada' ? 'success' : 'default'}
-                          label={a.status}
-                          sx={{ textTransform: 'capitalize' }}
-                        />
-                      }
+                <ListItem
+                  secondaryAction={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Chip
+                    size="small"
+                    color={a.status === 'aceptada' ? 'success' : 'default'}
+                    label={a.status}
+                    sx={{ textTransform: 'capitalize' }}
+                  />
+                  <Button
+                    size="small"
+                    variant="contained"
+                    onClick={() => finishFromHome(a.id)}
+                  >
+                    Terminar Cita
+                  </Button>
+                  </Box>
+                    }
                     >
                       <ListItemText
                         primary={clientName(a.client_id)}

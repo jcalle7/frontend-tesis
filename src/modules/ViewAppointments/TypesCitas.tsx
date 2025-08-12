@@ -1,4 +1,4 @@
-export type EstadoCita = 'pendiente' | 'aceptada' | 'cancelada';
+export type EstadoCita = 'pendiente' | 'aceptada' | 'cancelada' | 'terminada';
 
 export interface AppointmentData {
   id: string;

@@ -1,29 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
-  AppBar,
-  Box,
-  CssBaseline,
-  Drawer,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Toolbar,
-  Typography,
-  Tooltip,
-  Avatar, 
-  Menu,
-  MenuItem,
-  Divider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button,
+  AppBar, Box, CssBaseline, Drawer, IconButton, List, ListItem,
+  ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography,
+  Tooltip, Avatar, Menu, MenuItem, Divider, Dialog, DialogTitle,
+  DialogContent, DialogContentText, DialogActions, Button, useMediaQuery
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { supabase } from "../components/lib/supabaseClient";
 import MenuIcon from '@mui/icons-material/Menu';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -34,14 +16,15 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import LogoutRounded from '@mui/icons-material/LogoutRounded';
 import HomeOutlined from '@mui/icons-material/HomeOutlined';
-import BusinessIcon from '@mui/icons-material/Business'; 
+import BusinessIcon from '@mui/icons-material/Business';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 
 const drawerWidthExpanded = 230;
 const drawerWidthCollapsed = 70;
+const drawerWidthMobile = 280;
 
 const navItems = [
-  { text: 'Inicio', icon: <HomeOutlined />, path: '/inicio' },          
+  { text: 'Inicio', icon: <HomeOutlined />, path: '/inicio' },
   { text: 'Registrar Cliente', icon: <PersonAddIcon />, path: '/register-client' },
   { text: 'Historial Cliente', icon: <HistoryIcon />, path: '/history-client' },
   { text: 'Servicios', icon: <BuildIcon />, path: '/services' },
@@ -53,9 +36,7 @@ const navItems = [
 
 function stringToColor(str: string) {
   let hash = 0;
-  for (let i = 0; i < str.length; i += 1) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
+  for (let i = 0; i < str.length; i += 1) hash = str.charCodeAt(i) + ((hash << 5) - hash);
   let color = '#';
   for (let i = 0; i < 3; i += 1) {
     const value = (hash >> (i * 8)) & 0xff;
@@ -63,25 +44,28 @@ function stringToColor(str: string) {
   }
   return color;
 }
-
 const clean = (s: string) => s.trim().replace(/\s+/g, ' ');
-
 function twoInitials(name: string) {
   const parts = clean(name).split(' ');
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
-
 function pickNameOrEmail(userName?: string, email?: string) {
   if (userName && userName.trim()) return clean(userName);
-  if (email) return email.split('@')[0]; // antes del @
+  if (email) return email.split('@')[0];
   return 'Usuario';
 }
 
 export default function AdminLayout() {
-  const [collapsed, setCollapsed] = useState(false);
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+
+  const [collapsed, setCollapsed] = useState(false);   // solo desktop
+  const [mobileOpen, setMobileOpen] = useState(false); // solo móvil
+
   const navigate = useNavigate();
   const location = useLocation();
+
   const [userRole, setUserRole] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>('');
@@ -92,6 +76,7 @@ export default function AdminLayout() {
   const menuOpen = Boolean(menuAnchor);
   const [confirmLogout, setConfirmLogout] = useState(false);
 
+  // cargar datos de usuario / empresa
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -103,11 +88,9 @@ export default function AdminLayout() {
       const first = user.user_metadata?.first_name as string | undefined;
       const last = user.user_metadata?.last_name as string | undefined;
       const full = user.user_metadata?.name as string | undefined;
-      const builtName = full || [first, last].filter(Boolean).join(' ');
       setUserName(full || [first, last].filter(Boolean).join(' ') || '');
       setUserEmail(user.email || '');
 
-      // Busca la empresa del usuario (si está vinculado en company_users)
       const { data: companyUser } = await supabase
         .from('company_users')
         .select('company_id')
@@ -120,11 +103,9 @@ export default function AdminLayout() {
           .select('name')
           .eq('id', companyUser.company_id)
           .maybeSingle();
-
         setCompanyName(company?.name ?? null);
-      } else {
-        // Si es superadmin y no tiene empresa vinculada, mostramos "Superadmin"
-        if (role === 'superadmin') setCompanyName(null);
+      } else if (role === 'superadmin') {
+        setCompanyName(null);
       }
     })();
   }, []);
@@ -134,15 +115,15 @@ export default function AdminLayout() {
     navigate('/login');
   };
 
-const filteredNavItems = (() => {
-  if (userRole === 'superadmin') {
-    return [
-      { text: 'Inicio', icon: <EventNoteIcon />, path: '/' },
-      { text: 'Registrar Empresa', icon: <BusinessIcon />, path: '/register-company' },
-    ];
-  }
-  return navItems.filter((item) => !item.role || item.role === userRole);
-})();
+  const filteredNavItems = (() => {
+    if (userRole === 'superadmin') {
+      return [
+        { text: 'Inicio', icon: <EventNoteIcon />, path: '/' },
+        { text: 'Registrar Empresa', icon: <BusinessIcon />, path: '/register-company' },
+      ];
+    }
+    return navItems.filter((item) => !item.role || item.role === userRole);
+  })();
 
   const titleText =
     companyName
@@ -154,25 +135,71 @@ const filteredNavItems = (() => {
   const baseName = pickNameOrEmail(userName, userEmail);
   const initials = useMemo(() => twoInitials(baseName), [baseName]);
   const avatarColor = useMemo(() => stringToColor(baseName), [baseName]);
-  const saludoNombre = useMemo(() => clean(baseName).split(' ')[0], [baseName]); 
+  const saludoNombre = useMemo(() => clean(baseName).split(' ')[0], [baseName]);
+
+  // contenido del menú (lo reutilizamos en desktop y móvil)
+  const NavList = (
+    <List>
+      {filteredNavItems.map((item) => {
+        const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+        return (
+          <ListItem key={item.text} disablePadding>
+            <ListItemButton
+              onClick={() => {
+                navigate(item.path);
+                setMobileOpen(false); // cerrar drawer en móvil al navegar
+              }}
+              selected={isActive}
+              sx={{
+                ...(isActive && {
+                  backgroundColor: 'action.selected',
+                  '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
+                    color: 'primary.main',
+                    fontWeight: 'bold',
+                  },
+                }),
+                '&:hover': { backgroundColor: 'action.hover' },
+              }}
+            >
+              <ListItemIcon>{item.icon}</ListItemIcon>
+              {/* En desktop colapsado ocultamos el texto; en móvil siempre mostramos */}
+              {(!isDesktop || !collapsed) && <ListItemText primary={item.text} />}
+            </ListItemButton>
+          </ListItem>
+        );
+      })}
+    </List>
+  );
 
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
 
       {/* TOPBAR */}
-      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+      <AppBar position="fixed" sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}>
         <Toolbar variant="dense" sx={{ justifyContent: 'space-between' }}>
           <IconButton
             color="inherit"
             edge="start"
-            onClick={() => setCollapsed(!collapsed)}
+            onClick={() => (isDesktop ? setCollapsed((v) => !v) : setMobileOpen(true))}
             sx={{ mr: 2 }}
+            aria-label="Abrir menú"
           >
             <MenuIcon />
           </IconButton>
 
-          <Typography variant="h6" sx={{ flexGrow: 1, textAlign: 'center', marginRight: collapsed ? 6 : 0 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              flexGrow: 1,
+              textAlign: 'center',
+              pr: isDesktop ? (collapsed ? 7 : 0) : 0, // compensa íconos a la derecha
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+            title={titleText}
+          >
             {titleText}
           </Typography>
 
@@ -184,24 +211,16 @@ const filteredNavItems = (() => {
               Hola, {saludoNombre}
             </Typography>
 
-          {/* Avatar + menú */}
-          <Tooltip title={userName || userEmail || 'Cuenta'}>
-            <IconButton
-              onClick={(e) => setMenuAnchor(e.currentTarget)}
-              size="small"
-              sx={{ ml: 1 }}
-              aria-controls={menuOpen ? 'account-menu' : undefined}
-              aria-haspopup="true"
-              aria-expanded={menuOpen ? 'true' : undefined}
-            >
+            <Tooltip title={userName || userEmail || 'Cuenta'}>
+              <IconButton
+                onClick={(e) => setMenuAnchor(e.currentTarget)}
+                size="small"
+                aria-controls={menuOpen ? 'account-menu' : undefined}
+                aria-haspopup="true"
+                aria-expanded={menuOpen ? 'true' : undefined}
+              >
                 <Avatar
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    bgcolor: avatarColor,      
-                    color: '#fff',
-                    fontWeight: 700,
-                  }}
+                  sx={{ width: 40, height: 40, bgcolor: avatarColor, color: '#fff', fontWeight: 700 }}
                 >
                   {initials}
                 </Avatar>
@@ -236,55 +255,43 @@ const filteredNavItems = (() => {
         </Toolbar>
       </AppBar>
 
-      {/* SIDEBAR */}
-      <Drawer
-        variant="permanent"
-        open={!collapsed}
-        sx={{
-          width: collapsed ? drawerWidthCollapsed : drawerWidthExpanded,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
+      {/* SIDEBAR — Desktop (permanent y colapsable) */}
+      {isDesktop && (
+        <Drawer
+          variant="permanent"
+          open={!collapsed}
+          sx={{
             width: collapsed ? drawerWidthCollapsed : drawerWidthExpanded,
-            transition: 'width 0.3s',
-            overflowX: 'hidden',
-            boxSizing: 'border-box',
-          },
-        }}
-      >
-        <Toolbar variant="dense"/>
-        <List>
-          {filteredNavItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            flexShrink: 0,
+            '& .MuiDrawer-paper': {
+              width: collapsed ? drawerWidthCollapsed : drawerWidthExpanded,
+              transition: 'width 0.3s',
+              overflowX: 'hidden',
+              boxSizing: 'border-box',
+            },
+          }}
+        >
+          <Toolbar variant="dense" />
+          {NavList}
+        </Drawer>
+      )}
 
-            return (
-              <ListItem key={item.text} disablePadding>
-                <ListItemButton
-                  onClick={() => navigate(item.path)}
-                  selected={isActive}
-                  sx={{
-                    ...(isActive && {
-                      backgroundColor: '#e0e0e0',
-                      '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
-                        color: 'primary.main',
-                        fontWeight: 'bold',
-                      },
-                    }),
-                    '&:hover': {
-                      backgroundColor: '#f5f5f5',
-                    },
-                  }}
-                >
-                  <ListItemIcon>{item.icon}</ListItemIcon>
-                  {!collapsed && <ListItemText primary={item.text} />}
-                </ListItemButton>
-              </ListItem>
-            );
-          })}
-        </List>
-      </Drawer>
+      {/* SIDEBAR — Móvil (temporary, overlay) */}
+      {!isDesktop && (
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          ModalProps={{ keepMounted: true }}
+          PaperProps={{ sx: { width: drawerWidthMobile } }}
+        >
+          <Toolbar variant="dense" />
+          {NavList}
+        </Drawer>
+      )}
 
-      {/* CONTENIDO PRINCIPAL */}
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      {/* CONTENIDO */}
+      <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, md: 3 } }}>
         <Toolbar variant="dense" />
         <Outlet />
       </Box>

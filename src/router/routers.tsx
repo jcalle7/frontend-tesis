@@ -22,6 +22,7 @@ import CompanyListPage from "../modules/CompanyRegister/CompanyListPage";
 import ClientsAppointments from '../modules/ServicesLanding/pages/ClientAppointments'; 
 import HomeDashboard from '../modules/Dashboard/HomeDashboard';
 import DashboardSwitcher from "../modules/Dashboard/DashboardSwitcher";
+import RequireClientAuth from '../guards/RequireClientAuth';
 
 export const router = createBrowserRouter([
   {
@@ -30,7 +31,11 @@ export const router = createBrowserRouter([
   },
   {
     path: '/empresa/:slug',
-    element: <CompanyLandingPage />, // Ruta pública de landing
+    element: (
+      <RequireClientAuth>
+        <CompanyLandingPage />
+      </RequireClientAuth>
+    ),
   },
   {
   path: '/mi-empresa',
@@ -47,10 +52,6 @@ export const router = createBrowserRouter([
   { 
   path: 'formularios/enviados', 
   element: <FormSubmissionsTable /> 
-  },
-  {
-  path: '/mi-empresa',
-  element: <RedirectClientToSlugLanding />
   },
   {
   path: '/mis-citas',

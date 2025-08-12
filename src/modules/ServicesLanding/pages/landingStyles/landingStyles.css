@@ -298,4 +298,11 @@ section#servicios > h2 {
 .social-btn.wa { color:#25D366; }
 
 
+@media (max-width: 600px){
+  section:not(.band){ padding: 2rem 1rem; }
+  .services-grid{ gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+  .hero{ height: clamp(220px, 48vw, 520px); }
+}
+
+
 

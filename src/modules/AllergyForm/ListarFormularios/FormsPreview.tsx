@@ -27,7 +27,7 @@ export default function FormPreview() {
   }, [id]);
 
   return (
-    <Box>
+    <Box sx={{ maxWidth: 900, mx: 'auto', px: { xs: 2, md: 0 } }}>
       <Typography variant="h4" gutterBottom>
         Vista Previa del Formulario
       </Typography>

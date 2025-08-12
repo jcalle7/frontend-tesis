@@ -56,17 +56,22 @@ export default function SendFormDialog({
     fetchForms();
   }, [open, companyId]);
 
+const BASE_URL =
+  (import.meta as any).env?.VITE_PUBLIC_BASE_URL || window.location.origin;
+  
 const handleSend = (formId: string) => {
-  const url = `${window.location.origin}/formularios/llenar/${formId}/${clientId}`;
+  // construye la ruta y resuélvela contra la base (evita dobles /)
+  const fillPath = `/formularios/llenar/${formId}/${clientId}`;
+  const fullUrl = new URL(fillPath, BASE_URL).toString();
+
   const numero = clientPhone.replace(/\D/g, "");
   if (!numero || numero.length < 10) {
     alert("Número de teléfono inválido");
     return;
   }
 
-  const mensaje = `Hola ${clientName}, por favor completa el formulario: ${url}`;
+  const mensaje = `Hola ${clientName}, por favor completa el formulario: ${fullUrl}`;
   const whatsappURL = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
-
   window.open(whatsappURL, "_blank");
   onClose();
 };

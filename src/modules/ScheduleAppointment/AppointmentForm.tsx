@@ -23,6 +23,9 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs, { Dayjs } from 'dayjs';
 import { supabase } from '../../components/lib/supabaseClient';
+dayjs.locale('es'); 
+import 'dayjs/locale/es';
+import { esES as pickersEsES } from '@mui/x-date-pickers/locales';
 
 export default function AppointmentForm() {
   const makeInitialDate = () => {
@@ -352,7 +355,7 @@ export default function AppointmentForm() {
       />
 
       {/* Fecha + disponibilidad */}
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es" localeText={pickersEsES.components.MuiLocalizationProvider.defaultProps.localeText}>
         <DatePicker
           label="Seleccionar fecha"
           value={selectedDate}

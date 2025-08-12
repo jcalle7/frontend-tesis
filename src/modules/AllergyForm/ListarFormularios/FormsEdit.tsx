@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../../components/lib/supabaseClient';
 import { Box, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton, Snackbar, Alert } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 interface Question {
   id: string;
@@ -16,6 +18,8 @@ interface FormsEditProps {
 }
 
 export default function FormsEdit({ open, formId, onClose, onAfterSave }: FormsEditProps) {
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.down('sm'));
   const [title, setTitle] = useState('');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [newQuestion, setNewQuestion] = useState('');
@@ -85,7 +89,7 @@ export default function FormsEdit({ open, formId, onClose, onAfterSave }: FormsE
 
   return (
     <>
-      <Dialog open={open} onClose={handleClose} fullWidth>
+      <Dialog open={open} onClose={handleClose} fullScreen={isXs} fullWidth maxWidth="sm">
         <DialogTitle>Editar Formulario</DialogTitle>
         <DialogContent>
           <TextField
