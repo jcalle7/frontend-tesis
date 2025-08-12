@@ -13,7 +13,7 @@ import CompanyRegisterPage from "../modules/CompanyRegister/CompanyRegisterPage"
 import ClientListPage from "../modules/RegisterClient/ListarClientes/ClientListPage.tsx";
 import FormPreview from "../modules/AllergyForm/ListarFormularios/FormsPreview.tsx";
 import FormsTable from "../modules/AllergyForm/ListarFormularios/FormsTable.tsx";
-import CompanyLandingPage from '../modules/ServicesLanding/pages/CompanyLandingPage.tsx';
+import CompanyLandingPage from '../modules/ServicesLanding/pages/CompanyLandingPage';
 import RedirectClientToSlugLanding from '../modules/ServicesLanding/pages/RedirectClientToSlugLanding.tsx';
 import LoginClientPage from '../components/Pages/loginClientPage.tsx'; 
 import FillFormPage from '../modules/ViewAppointments/FillFormPage';

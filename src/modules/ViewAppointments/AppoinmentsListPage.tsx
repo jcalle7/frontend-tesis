@@ -3,7 +3,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import AppointmentTable from "./AppoinmentsTable";
 import { AppointmentData, EstadoCita } from "./TypesCitas";
 import { useEffect, useState } from "react";
-import { supabase } from "../../components/lib/supabaseClient.ts";
+import { supabase } from "../../components/lib/supabaseClient";
 import SendFormDialog from "../ViewAppointments/SendFormDialog";
 
 export default function AppointmentListPage() {

@@ -1,7 +1,7 @@
 import { Box, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Snackbar, Alert } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useState, useEffect } from 'react';
-import { supabase } from '../../components/lib/supabaseClient.ts';  
+import { supabase } from '../../components/lib/supabaseClient';  
 
 interface Question {
   id: number;

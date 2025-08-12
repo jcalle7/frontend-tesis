@@ -6,7 +6,7 @@ import {
   Typography,
   Alert,
 } from '@mui/material';
-import { supabase } from '../../components/lib/supabaseClient.ts';
+import { supabase } from '../../components/lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import {
   containerStylesClient,

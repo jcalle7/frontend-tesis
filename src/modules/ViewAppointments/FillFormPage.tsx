@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { supabase } from "../../components/lib/supabaseClient.ts";
+import { supabase } from "../../components/lib/supabaseClient";
 import { Box, Button, CircularProgress, TextField, Typography } from "@mui/material";
 
 interface Form {

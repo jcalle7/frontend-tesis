@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 import { useState, useEffect } from 'react';
 import bcrypt from 'bcryptjs';
-import { supabase } from '../../../components/lib/supabaseClient.ts';
+import { supabase } from '../../../components/lib/supabaseClient';
 import React from "react";
 import { InputAdornment, IconButton } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';

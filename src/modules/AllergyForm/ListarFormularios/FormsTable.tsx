@@ -8,7 +8,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PreviewIcon from '@mui/icons-material/Visibility';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from "../../../components/lib/supabaseClient.ts";
+import { supabase } from "../../../components/lib/supabaseClient";
 import { TransitionProps } from '@mui/material/transitions';
 import FormsEdit from "../ListarFormularios/FormsEdit.tsx";
 

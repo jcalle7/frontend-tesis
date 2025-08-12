@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 import { CompanyFormData } from '../TypesCompany.ts';
-import { supabase } from '../../../components/lib/supabaseClient.ts';
+import { supabase } from '../../../components/lib/supabaseClient';
 
 type Props = {
   open: boolean;

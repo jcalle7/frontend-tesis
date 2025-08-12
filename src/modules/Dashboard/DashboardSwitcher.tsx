@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CircularProgress } from '@mui/material';
-import { supabase } from '../../components/lib/supabaseClient.ts';
+import { supabase } from '../../components/lib/supabaseClient';
 import HomeDashboard from './HomeDashboard';
 import SuperAdminDashboard from './SuperAdminDashboard';
 

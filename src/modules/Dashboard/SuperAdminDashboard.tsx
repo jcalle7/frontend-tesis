@@ -10,7 +10,7 @@ import CalendarMonthOutlined from '@mui/icons-material/CalendarMonthOutlined';
 import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
 import NewReleasesOutlined from '@mui/icons-material/NewReleasesOutlined';
 import dayjs from 'dayjs';
-import { supabase } from '../../components/lib/supabaseClient.ts';
+import { supabase } from '../../components/lib/supabaseClient';
 
 type Company = { id: string; name?: string; created_at?: string };
 type Appointment = { id: string; company_id: string; date: string; time: string; status: string };

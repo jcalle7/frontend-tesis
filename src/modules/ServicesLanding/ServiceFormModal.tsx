@@ -35,6 +35,7 @@ interface Props {
     duracion: string;
     descripcion: string;
     imagen?: string;
+    extras_note?: string;
   };
   onClose: () => void;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -53,6 +54,7 @@ export default function ServiceFormModal({ open, formData, onClose, onChange, on
         <TextField fullWidth label="Precio del servicio" name="precio" value={formData.precio} onChange={onChange} margin="normal" />
         <TextField fullWidth label="Duración del servicio" name="duracion" value={formData.duracion} onChange={onChange} margin="normal" />
         <TextField fullWidth label="Descripción" name="descripcion" value={formData.descripcion} onChange={onChange} multiline rows={2} margin="normal" />
+        <TextField fullWidth label="Nota de extras (opcional)" name="extras_note" value={formData.extras_note || ''} onChange={onChange} margin="normal" multiline rows={3} helperText="Ej.: Según el diseño puede subir $1–$2. / Según largo máximo puede subir hasta $5."/>
 
         <Button component="label" variant="outlined" startIcon={<AddPhotoAlternateIcon />} fullWidth sx={{ mt: 2 }}>
           Subir Imagen

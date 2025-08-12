@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../../../components/lib/supabaseClient.ts';
+import { supabase } from '../../../components/lib/supabaseClient';
 import { Container, Typography, Card, CardContent, Chip, CircularProgress } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import type { ChipProps } from '@mui/material';

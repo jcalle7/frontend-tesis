@@ -24,7 +24,7 @@ import {
   DialogActions,
   Button,
 } from '@mui/material';
-import { supabase } from "../components/lib/supabaseClient.ts";
+import { supabase } from "../components/lib/supabaseClient";
 import MenuIcon from '@mui/icons-material/Menu';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import HistoryIcon from '@mui/icons-material/History';

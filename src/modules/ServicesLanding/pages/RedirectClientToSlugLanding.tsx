@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../../components/lib/supabaseClient.ts';
+import { supabase } from '../../../components/lib/supabaseClient';
 
 export default function RedirectClientToSlugLanding() {
   const navigate = useNavigate();

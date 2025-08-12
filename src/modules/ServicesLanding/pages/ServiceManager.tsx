@@ -9,7 +9,7 @@ import { ServiceData, useServices } from '../../ServicesLanding/hooks/useService
 import { TransitionProps } from '@mui/material/transitions';
 import { containerStylesServices, titleStylesServices } from '../../ServicesLanding/Styles/ServiceLandingPage.styles.ts';
 import LandingForm from '../../ServicesLanding/LandingForm.tsx';
-import { supabase } from '../../../components/lib/supabaseClient.ts';
+import { supabase } from '../../../components/lib/supabaseClient';
 
 const Transition = React.forwardRef<HTMLDivElement, TransitionProps & { children: React.ReactElement }>(
   function Transition(props, ref) {
@@ -44,6 +44,7 @@ export default function ServiceManager() {
     duracion: '',
     descripcion: '',
     imagen: '',
+    extras_note: '',                 
   });
   const [editingId, setEditingId] = useState<number | null>(null);
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 });
@@ -246,6 +247,7 @@ const handleLandingSubmit = async () => {
       duracion: service.duracion,
       descripcion: service.descripcion,
       imagen: service.imagen,
+      extras_note: service.extras_note || '',     
     });
     setEditingId(service.id);
     setFormOpen(true);

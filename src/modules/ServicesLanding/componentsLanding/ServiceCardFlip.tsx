@@ -1,17 +1,19 @@
+import React from 'react';
 import '../pages/serviceCardFlip/serviceCardFlip.css';
 
-interface Props {
+type Props = {
   name: string;
   description: string;
   price: number;
   duration: number;
   image: string;
-  onClick: () => void;
-  onAddToCart: () => void;
-  selected: boolean;
-}
+  onClick?: () => void;
+  onAddToCart?: () => void;
+  selected?: boolean;
+  extrasNote?: string; // opcional
+};
 
-export default function ServiceCardFlip({
+const ServiceCardFlip: React.FC<Props> = ({
   name,
   description,
   price,
@@ -20,35 +22,49 @@ export default function ServiceCardFlip({
   onClick,
   onAddToCart,
   selected,
-}: Props) {
+  extrasNote,
+}) => {
   return (
-    <div className={`card-flip ${selected ? 'selected' : ''}`}>
+    <div className={`card-flip${selected ? ' selected' : ''}`} onClick={onClick}>
       <div className="card-inner">
         {/* Frente */}
         <div className="card-front">
-          <img src={image} alt={name} className="card-img" />
+          <div className="card-badges">
+            <span className="badge price">Desde ${price}</span>
+          </div>
+
+          <img className="card-img" src={image} alt={name} />
           <div className="card-body">
-            <h3 className="text-lg font-semibold">{name}</h3>
-            <p className="text-sm text-gray-600 line-clamp-2">{description}</p>
+            <h3>{name}</h3>
+            <p>{description}</p>
           </div>
         </div>
 
         {/* Reverso */}
-        <div className="card-back">
-          <p className="text-sm font-medium text-gray-800">Precio: ${price}</p>
-          <p className="text-sm text-gray-700">Duración: {duration} min</p>
-          <button
-            className="select-button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onClick();
-              onAddToCart();
-            }}
-          >
-            Añadir al carrito
-          </button>
+        <div className="card-back" onClick={(e) => e.stopPropagation()}>
+          <div className="card-back-content">
+            <div className="back-stats">
+              <span className="badge price">Desde ${price}</span>
+            </div>
+            <div className="back-row">
+              <span className="label">Duración:</span>
+              <span className="value">{duration > 0 ? `${duration} min` : '—'}</span>
+            </div>
+
+            {extrasNote && <div className="extras-note">{extrasNote}</div>}
+
+            <button
+              type="button"
+              className="select-button"
+              onClick={() => onAddToCart && onAddToCart()}
+            >
+              Añadir al carrito
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default ServiceCardFlip;

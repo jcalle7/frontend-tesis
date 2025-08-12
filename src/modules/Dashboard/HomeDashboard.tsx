@@ -11,7 +11,7 @@ import CalendarMonthOutlined from '@mui/icons-material/CalendarMonthOutlined';
 import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
 import AccessTimeOutlined from '@mui/icons-material/AccessTimeOutlined';
 import dayjs from 'dayjs';
-import { supabase } from '../../components/lib/supabaseClient.ts';
+import { supabase } from '../../components/lib/supabaseClient';
 
 type Service = { id: string; name?: string; is_active?: boolean; company_id?: string; };
 type Client = { id: string; first_name?: string; last_name?: string; company_id?: string; };

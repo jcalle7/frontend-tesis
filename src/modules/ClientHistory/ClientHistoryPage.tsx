@@ -3,7 +3,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import ClientTable from "./ClientTable.tsx";
 import { ClientHistory } from "./TypesHistory.tsx";
 import { useEffect, useState } from 'react';
-import { supabase } from '../../components/lib/supabaseClient.ts';
+import { supabase } from '../../components/lib/supabaseClient';
 
 const norm = (s: string) =>
   s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();

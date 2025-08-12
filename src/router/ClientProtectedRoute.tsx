@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { supabase } from "../components/lib/supabaseClient.ts";
+import { supabase } from "../components/lib/supabaseClient";
 import React from 'react';
 
 export default function ClientProtectedRoute({ children }: React.PropsWithChildren) {

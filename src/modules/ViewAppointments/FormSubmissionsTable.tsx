@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../../components/lib/supabaseClient.ts";
+import { supabase } from "../../components/lib/supabaseClient";
 import {
   Box,
   CircularProgress,

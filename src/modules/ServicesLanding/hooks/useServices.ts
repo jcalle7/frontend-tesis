@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../../../components/lib/supabaseClient.ts';
+import { supabase } from '../../../components/lib/supabaseClient';
 
 export interface ServiceData {
   id: number;
@@ -8,6 +8,7 @@ export interface ServiceData {
   duracion: string;
   descripcion: string;
   imagen?: string;
+  extras_note?: string; 
 }
 
 interface ServiceRow {
@@ -17,6 +18,7 @@ interface ServiceRow {
   duration_minutes: number  |  string; 
   description: string  |  null;
   image_url?: string;
+  extras_note?: string | null;  // <- NUEVO
 }
 
 function dataURItoBlob(dataURI: string): Blob {
@@ -72,6 +74,7 @@ export function useServices() {
           duracion: s.duration_minutes.toString() ?? '',
           descripcion: s.description ?? '',
           imagen: s.image_url || '',
+          extras_note: s.extras_note ?? '',   
         }))
       );
     }
@@ -112,6 +115,7 @@ export function useServices() {
           duration_minutes: parseInt(formData.duracion),
           description: formData.descripcion ?? '',
           image_url,
+          extras_note: formData.extras_note ?? null,  
         })
         .eq('id', editingId);
 
@@ -124,6 +128,7 @@ export function useServices() {
         description: formData.descripcion ?? '',
         image_url,
         company_id: companyData.company_id,
+        extras_note: formData.extras_note ?? null,    
       }]);
 
       if (error) throw new Error('Error creando servicio');

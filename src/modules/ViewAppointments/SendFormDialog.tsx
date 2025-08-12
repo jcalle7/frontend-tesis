@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { supabase } from "../../components/lib/supabaseClient.ts";
+import { supabase } from "../../components/lib/supabaseClient";
 
 interface FormItem {
   id: string;
