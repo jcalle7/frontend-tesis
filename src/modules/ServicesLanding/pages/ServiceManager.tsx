@@ -140,7 +140,26 @@ export default function ServiceManager() {
 
     setLandingForm(fullLanding);
     setInitialLanding(fullLanding);
-    }
+    } else {
+  // 👉 NUEVO: si no hay landing creada, fija el estado inicial actual
+  const emptyLanding = {
+    cover_url: '',
+    title: '',
+    facebook_url: '',
+    instagram_url: '',
+    tiktok_url: '',
+    phone: '',
+    address: '',
+    email: '',
+    bank_account: '',
+    cedula: '',
+    whatsapp_url: '',
+    whatsapp_number: '',
+    map_url: '',
+  };
+  setLandingForm(emptyLanding);
+  setInitialLanding(emptyLanding);
+}
   };
 
   useEffect(() => {
@@ -151,7 +170,12 @@ export default function ServiceManager() {
     const { name, value } = e.target;
 
   setLandingForm((prev) => ({ ...prev, [name]: value }));
-  const hasChanges = JSON.stringify(landingForm) !== JSON.stringify(initialLanding);
+  const hasChanges =
+  initialLanding
+    ? JSON.stringify(landingForm) !== JSON.stringify(initialLanding)
+    : Object.values(landingForm).some((v) =>
+        typeof v === 'string' ? v.trim() !== '' : v != null
+      );
   };
 
   const handleLandingImageChange = async (file: File) => {
@@ -167,6 +191,39 @@ export default function ServiceManager() {
 
 const handleLandingSubmit = async () => {
   if (!companyId) return;
+
+    try {
+    const payload = {
+      company_id: companyId,
+      cover_url: landingForm.cover_url || null,
+      title: landingForm.title || '',
+      facebook_url: landingForm.facebook_url || null,
+      instagram_url: landingForm.instagram_url || null,
+      tiktok_url: landingForm.tiktok_url || null,
+      phone: landingForm.phone || null,
+      address: landingForm.address || null,
+      email: landingForm.email || null,
+      bank_account: landingForm.bank_account || null,
+      cedula: landingForm.cedula || null,
+      whatsapp_url: landingForm.whatsapp_url || null,
+      whatsapp_number: landingForm.whatsapp_number || null,
+      map_url: landingForm.map_url || null,
+      updated_at: new Date().toISOString(),
+    };
+
+    // 👉 un solo upsert, sin SELECT previo (evita 406)
+    const { error } = await supabase
+      .from('landing_data')
+      .upsert(payload, { onConflict: 'company_id' });
+
+    if (error) throw error;
+
+    setSnackbar({ open: true, message: `✅ Configuración guardada para ${companyName}.`, severity: 'success' });
+    setInitialLanding({ ...landingForm });
+  } catch (e: any) {
+    console.error('[Guardar landing] ', e);
+    setSnackbar({ open: true, message: `❌ Error guardando: ${e?.message ?? e}`, severity: 'error' });
+  };
 
   const { data: existing } = await supabase
     .from('landing_data')

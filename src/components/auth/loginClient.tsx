@@ -20,7 +20,9 @@ import {
   textFieldStylesClient,
 } from './StylesLogin/loginClientStyles.ts';
 
-// Normaliza a E.164 Ecuador (+593...)
+/* ======================
+   Normaliza a E.164 Ecuador (+593...)
+   ====================== */
 function normalizeEcPhone(input?: string | null) {
   if (!input) return null;
   let p = input.replace(/[^\d+]/g, '');
@@ -30,6 +32,134 @@ function normalizeEcPhone(input?: string | null) {
   return p;
 }
 
+/* ======================
+   HELPERS PARA NOMBRE Y UPSERT
+   ====================== */
+function splitName(full: string | null | undefined) {
+  const s = (full ?? '').trim().replace(/\s+/g, ' ');
+  if (!s) return { first: '', last: '' };
+  const parts = s.split(' ');
+  if (parts.length === 1) return { first: parts[0], last: '' };
+  return { first: parts.slice(0, -1).join(' '), last: parts.slice(-1)[0] };
+}
+
+function nameFromEmail(email?: string | null) {
+  if (!email) return { first: '', last: '' };
+  const local = email.split('@')[0].replace(/[._-]+/g, ' ').trim();
+  return splitName(local);
+}
+
+/**
+ * Vincula (o corrige) el cliente a una empresa por slug.
+ * - Incluye SIEMPRE user_id.
+ * - Usa UPSERT por (company_id, email).
+ */
+async function ensureClientLinkedToSlug(opts: {
+  userId: string;
+  currentEmail: string;
+  slug: string;
+  profile?: { first_name?: string; last_name?: string; phone?: string };
+}) {
+  const { userId, currentEmail, slug, profile } = opts;
+
+  // Empresa
+  const { data: company } = await supabase
+    .from('companies')
+    .select('id')
+    .eq('slug', slug)
+    .single();
+  if (!company?.id) return false;
+
+  const phoneE164 = normalizeEcPhone(profile?.phone || null);
+
+  // UPSERT por (company_id,email), estableciendo user_id también
+  const { error: upErr } = await supabase
+    .from('clients')
+    .upsert(
+      {
+        company_id: company.id,
+        email: currentEmail,
+        user_id: userId, // clave
+        first_name: profile?.first_name ?? null,
+        last_name: profile?.last_name ?? null,
+        phone: phoneE164 ?? null,
+      },
+      { onConflict: 'company_id,email' }
+    );
+
+  if (upErr) return false;
+
+  // Asegura user_id si existe fila vieja sin user_id
+  await supabase
+    .from('clients')
+    .update({ user_id: userId })
+    .eq('company_id', company.id)
+    .eq('email', currentEmail)
+    .is('user_id', null);
+
+  return true;
+}
+
+/**
+ * Normaliza/corrige nombres y teléfono del cliente
+ * (nunca "App" y teléfono en E.164). También fija user_id.
+ */
+async function upsertClientForSignIn({
+  slug,
+  userId,
+  email,
+  fullName,
+  phoneInput,
+}: {
+  slug: string;
+  userId: string;
+  email: string | null;
+  fullName?: string | null;
+  phoneInput?: string | null;
+}) {
+  // Empresa
+  const { data: comp, error: compErr } = await supabase
+    .from('companies')
+    .select('id')
+    .eq('slug', slug)
+    .single();
+  if (compErr || !comp?.id) throw new Error('No se encontró la empresa para el slug.');
+
+  // Normalización
+  const { first: fnFromForm, last: lnFromForm } = splitName(fullName ?? '');
+  const { first: fnFromMail, last: lnFromMail } = nameFromEmail(email ?? '');
+  const first_name = fnFromForm || fnFromMail || 'Cliente';
+  const last_name = lnFromForm || lnFromMail || ''; // nunca "App"
+  const phone = normalizeEcPhone(phoneInput || '') || null;
+
+  // UPSERT por (company_id,email) con user_id
+  const { error: upErr } = await supabase
+    .from('clients')
+    .upsert(
+      {
+        company_id: comp.id,
+        email,
+        user_id: userId,
+        first_name,
+        last_name,
+        phone,
+      },
+      { onConflict: 'company_id,email' }
+    );
+  if (upErr) throw upErr;
+
+  // Si hay fila del mismo email sin user_id, fíjalo
+  await supabase
+    .from('clients')
+    .update({ user_id: userId })
+    .eq('company_id', comp.id)
+    .eq('email', email)
+    .is('user_id', null);
+}
+
+/* ======================
+   COMPONENTE
+   ====================== */
 export default function LoginClient() {
   const [mode, setMode] = useState<'login' | 'register'>('login');
 
@@ -70,59 +200,7 @@ export default function LoginClient() {
     return data;
   }
 
-  async function ensureClientLinkedToSlug(
-    currentEmail: string,
-    slug: string,
-    profile?: { first_name?: string; last_name?: string; phone?: string }
-  ) {
-    const company = await getCompanyBySlug(slug);
-    if (!company?.id) return false;
-
-    const phoneE164 = normalizeEcPhone(profile?.phone || null);
-
-    const upsertPayload = {
-      company_id: company.id,
-      email: currentEmail,
-      first_name: profile?.first_name || null,
-      last_name: profile?.last_name || null,
-      phone: phoneE164 || null,
-    };
-
-    // 1) intenta UPSERT por (company_id, email)
-    const { data: upData, error: upErr } = await supabase
-      .from('clients')
-      .upsert(upsertPayload, { onConflict: 'company_id,email' })
-      .select('id, first_name, last_name, phone')
-      .maybeSingle();
-
-    if (!upErr && upData) return true;
-
-    // 2) fallback si no hay UNIQUE
-    const { data: existing } = await supabase
-      .from('clients')
-      .select('id, first_name, last_name, phone')
-      .eq('company_id', company.id)
-      .eq('email', currentEmail)
-      .maybeSingle();
-
-    if (existing?.id) {
-      const patch: any = {};
-      if (profile?.first_name && !existing.first_name) patch.first_name = profile.first_name;
-      if (profile?.last_name && !existing.last_name) patch.last_name = profile.last_name;
-      if (phoneE164 && (!existing.phone || existing.phone !== phoneE164)) patch.phone = phoneE164;
-
-      if (Object.keys(patch).length) {
-        const { error: up2 } = await supabase.from('clients').update(patch).eq('id', existing.id);
-        return !up2;
-      }
-      return true;
-    }
-
-    const { error: insErr } = await supabase.from('clients').insert(upsertPayload);
-    return !insErr;
-  }
-
-  // LOGIN
+  /* ======= LOGIN ======= */
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
@@ -137,22 +215,37 @@ export default function LoginClient() {
       }
 
       const sessionResult = await supabase.auth.getSession();
-      const userEmail = sessionResult.data.session?.user.email;
-      if (!userEmail) {
+      const userObj = sessionResult.data.session?.user;
+      if (!userObj?.email) {
         setErrorMsg('⚠️ No se pudo obtener la sesión del usuario.');
         return;
       }
 
+      // Si llega con slug, primero garantizamos vínculo y luego normalizamos
       if (slugParam) {
-        await ensureClientLinkedToSlug(userEmail, slugParam);
+        await ensureClientLinkedToSlug({
+          userId: userObj.id,
+          currentEmail: userObj.email,
+          slug: slugParam,
+          profile: undefined,
+        });
+
+        await upsertClientForSignIn({
+          slug: slugParam,
+          userId: userObj.id,
+          email: userObj.email,
+          fullName: undefined,
+          phoneInput: undefined,
+        });
       }
 
+      // Si no hay slug en la URL, busca a qué empresa pertenece por su email
       let targetSlug = slugParam;
       if (!targetSlug) {
         const { data: client, error: clientError } = await supabase
           .from('clients')
           .select('company_id')
-          .eq('email', userEmail)
+          .eq('email', userObj.email)
           .limit(1)
           .maybeSingle();
 
@@ -181,7 +274,7 @@ export default function LoginClient() {
     }
   };
 
-  // REGISTRO
+  /* ======= REGISTRO ======= */
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
@@ -217,10 +310,25 @@ export default function LoginClient() {
         return;
       }
 
-      await ensureClientLinkedToSlug(session.user.email, slugParam, {
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-        phone: phoneEc,
+      // Vincula (y pone user_id)…
+      await ensureClientLinkedToSlug({
+        userId: session.user.id,
+        currentEmail: session.user.email,
+        slug: slugParam,
+        profile: {
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          phone: phoneEc,
+        },
+      });
+
+      // …y normaliza/corrige los campos
+      await upsertClientForSignIn({
+        slug: slugParam,
+        userId: session.user.id,
+        email: session.user.email,
+        fullName: `${firstName.trim()} ${lastName.trim()}`,
+        phoneInput: phoneEc,
       });
 
       navigate(`/empresa/${slugParam}`, { replace: true });

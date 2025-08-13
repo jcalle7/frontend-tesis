@@ -71,6 +71,7 @@ async function fetchClientHistory(): Promise<ClientHistory[]> {
         });
       }
     }
+  
 
     const clienteFinal: ClientHistory = {
       id: client.id,

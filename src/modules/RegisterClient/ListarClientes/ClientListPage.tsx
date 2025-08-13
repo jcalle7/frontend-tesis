@@ -80,7 +80,7 @@ export default function ClientListPage() {
         (c) =>
           c.first_name.toLowerCase().includes(value) ||
           c.last_name.toLowerCase().includes(value) ||
-          c.phone.toLowerCase().includes(value)
+          (c.phone ?? '').toLowerCase().includes(value)
       )
     );
   };

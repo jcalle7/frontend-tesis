@@ -81,10 +81,10 @@ export default function EditClientModal({
       <DialogTitle>Editar Cliente</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
-          <TextField label="Nombre" name="first_name" value={form.first_name} onChange={handleChange} fullWidth />
-          <TextField label="Apellido" name="last_name" value={form.last_name} onChange={handleChange} fullWidth />
-          <TextField label="Teléfono" name="phone" value={form.phone} onChange={handleChange} fullWidth />
-          <TextField label="Correo" name="email" value={form.email} onChange={handleChange} fullWidth />
+          <TextField label="Nombre" name="first_name" value={form.first_name ?? ''} onChange={handleChange} fullWidth />
+          <TextField label="Apellido" name="last_name" value={form.last_name ?? ''} onChange={handleChange} fullWidth />
+          <TextField label="Teléfono" name="phone" value={form.phone ?? ''} onChange={handleChange} fullWidth />
+          <TextField label="Correo" name="email" value={form.email ?? ''} onChange={handleChange} fullWidth />
           <TextField label="Comentarios" name="comments" value={form.comments || ''} onChange={handleChange} fullWidth multiline />
           <TextField
             label="Nueva Contraseña"

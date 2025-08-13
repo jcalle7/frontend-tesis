@@ -94,7 +94,7 @@ export default function CompanyRegisterPage() {
       {formError && (<CalloutAlert severity="error" title="Error al guardar" message="Completa todos los campos obligatorios." />)}
       <TextField label="Nombre de la empresa" name="name" value={form.name} onChange={handleChange} error={formError && form.name.trim() === ''} helperText={formError && form.name.trim() === '' ? 'Completa este campo' : ''}/> 
       <TextField label="Nombre del titular" name="owner_name" value={form.owner_name} onChange={handleChange} error={formError && form.name.trim() === ''} helperText={formError && form.name.trim() === '' ? 'Completa este campo' : ''}/>
-      <TextField label="RUC" name="ruc" value={form.ruc} onChange={handleChange} error={formError && form.name.trim() === ''} helperText={formError && form.name.trim() === '' ? 'Completa este campo' : ''}/>
+      <TextField label="RUC o Cédula" name="ruc" value={form.ruc} onChange={handleChange} error={formError && form.name.trim() === ''} helperText={formError && form.name.trim() === '' ? 'Completa este campo' : ''}/>
       <TextField label="Teléfono" name="phone" value={form.phone} onChange={handleChange} error={formError && form.name.trim() === ''} helperText={formError && form.name.trim() === '' ? 'Completa este campo' : ''}/>
       <TextField label="Correo de la empresa" name="email" value={form.email} onChange={handleChange} error={formError && form.name.trim() === ''} helperText={formError && form.name.trim() === '' ? 'Completa este campo' : ''}/>
       <TextField label="Dirección" name="address" value={form.address} onChange={handleChange} error={formError && form.name.trim() === ''} helperText={formError && form.name.trim() === '' ? 'Completa este campo' : ''}/>

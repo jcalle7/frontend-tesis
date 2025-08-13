@@ -7,7 +7,6 @@ import BusinessOutlined from '@mui/icons-material/BusinessOutlined';
 import PeopleAltOutlined from '@mui/icons-material/PeopleAltOutlined';
 import GroupOutlined from '@mui/icons-material/GroupOutlined';
 import CalendarMonthOutlined from '@mui/icons-material/CalendarMonthOutlined';
-import TrendingUpOutlined from '@mui/icons-material/TrendingUpOutlined';
 import NewReleasesOutlined from '@mui/icons-material/NewReleasesOutlined';
 import dayjs from 'dayjs';
 import { supabase } from '../../components/lib/supabaseClient';
@@ -76,18 +75,6 @@ export default function SuperAdminDashboard() {
     })();
   }, []);
 
-  // Top empresas por citas del mes
-  const topCompanies = useMemo(() => {
-    const map = new Map<string, number>();
-    monthAppointments.forEach(a => {
-      map.set(a.company_id, (map.get(a.company_id) || 0) + 1);
-    });
-    const byCount = [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
-    // id -> name
-    const nameById = new Map(companies.map(c => [c.id, c.name || 'Empresa']));
-    return byCount.map(([cid, count]) => ({ name: nameById.get(cid) || cid, count }));
-  }, [monthAppointments, companies]);
-
   if (loading) return <CircularProgress />;
   if (error) return <Alert severity="error">{error}</Alert>;
 
@@ -111,24 +98,7 @@ export default function SuperAdminDashboard() {
       </Box>
 
       {/* Listas */}
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))' }}>
-        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-            <TrendingUpOutlined color="primary" />
-            <Typography variant="h6" fontWeight={700}>Top empresas por citas (mes)</Typography>
-          </Box>
-          {topCompanies.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">Aún no hay datos suficientes.</Typography>
-          ) : (
-            <List dense>
-              {topCompanies.map((t, idx) => (
-                <ListItem key={idx} secondaryAction={<Chip size="small" label={t.count} />}>
-                  <ListItemText primary={t.name} />
-                </ListItem>
-              ))}
-            </List>
-          )}
-        </Paper>
+      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: '1fr' }}>
 
         <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
