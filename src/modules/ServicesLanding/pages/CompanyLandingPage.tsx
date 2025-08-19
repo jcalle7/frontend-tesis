@@ -16,6 +16,8 @@ type LandingData = {
   cover_url?: string;
   title?: string;
   bank_account?: string;
+  bank_type?: string;
+  bank_qr_url?: string;      
   phone?: string;
   email?: string;
   address?: string;
@@ -306,7 +308,7 @@ export default function CompanyLandingPage() {
         const { data: landing, error: landErr } = await supabase
           .from('landing_data')
           .select(`
-            cover_url, title, bank_account, phone, email, address,
+            cover_url, title, bank_type, bank_qr_url, bank_account, phone, email, address,
             facebook_url, instagram_url, tiktok_url,
             whatsapp_number, whatsapp_url, map_url, cedula, company_id
           `)
@@ -457,6 +459,8 @@ export default function CompanyLandingPage() {
         bankAccount={landingData?.bank_account ?? ''}
         idNumber={landingData?.cedula ?? landingData?.id_number ?? ''}
         companyId={companyId}
+        bankType={landingData?.bank_type ?? undefined}
+        bankQrUrl={landingData?.bank_qr_url ?? undefined}
       />
 
       {(landingData?.phone || landingData?.email || landingData?.address) && (

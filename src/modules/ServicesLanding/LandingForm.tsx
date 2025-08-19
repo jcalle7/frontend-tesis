@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, TextField, Button, Typography } from '@mui/material';
+import Chip from '@mui/material/Chip';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import MuiLink from '@mui/material/Link';
 
@@ -18,15 +19,25 @@ interface Props {
     whatsapp_url?: string;
     whatsapp_number?: string;
     map_url?: string;
+    bank_type?: string;
+    bank_qr_url?: string;
   };
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onImageChange: (file: File) => void;
+  onQrChange: (file: File) => void;                     
   onSubmit: () => void;
   disabled: boolean;
 }
 
-export default function LandingForm({ formData, onChange, onImageChange, onSubmit, disabled }: Props) {
-    const waLink =
+export default function LandingForm({
+  formData,
+  onChange,
+  onImageChange,
+  onQrChange,                                           
+  onSubmit,
+  disabled
+}: Props) {
+  const waLink =
     formData.whatsapp_url && formData.whatsapp_url.trim().length > 0
       ? formData.whatsapp_url
       : (formData.whatsapp_number || '').replace(/\D/g, '').length
@@ -51,7 +62,44 @@ export default function LandingForm({ formData, onChange, onImageChange, onSubmi
       <TextField fullWidth label="Teléfono" name="phone" value={formData.phone} onChange={onChange} margin="normal" />
       <TextField fullWidth label="Dirección" name="address" value={formData.address} onChange={onChange} margin="normal" />
       <TextField fullWidth label="Email" name="email" value={formData.email} onChange={onChange} margin="normal" />
+
       <TextField fullWidth label="Cuenta bancaria" name="bank_account" value={formData.bank_account} onChange={onChange} margin="normal" />
+      <TextField
+        fullWidth
+        label="Tipo de banco"
+        name="bank_type"
+        value={formData.bank_type || ''}
+        onChange={onChange}
+        margin="normal"
+        helperText="Ej: Banco Pichincha, Banco Guayaquil, JEP, etc."
+      />
+
+      <Button component="label" variant="outlined" fullWidth sx={{ mt: 1 }}>
+        Subir QR de banca móvil
+        <input
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={(e) => { if (e.target.files?.[0]) onQrChange(e.target.files[0]); }}
+        />
+      </Button>
+
+      <Box mt={1}>
+        {formData.bank_qr_url
+          ? <Chip label="QR subido" color="success" size="small" />
+          : <Chip label="Aún no has subido el QR" size="small" />}
+      </Box>
+
+      {formData.bank_qr_url && (
+        <Box mt={2}>
+          <img
+            src={formData.bank_qr_url}
+            alt="QR Banca Móvil"
+            style={{ width: 160, height: 160, objectFit: 'contain', borderRadius: 8 }}
+          />
+        </Box>
+      )}
+
       <TextField
         fullWidth
         label="Cédula/RUC (para transferencias)"
@@ -60,7 +108,7 @@ export default function LandingForm({ formData, onChange, onImageChange, onSubmi
         onChange={onChange}
         inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
         margin="normal"
-      />
+      />                                                     
 
       <TextField
         fullWidth
@@ -103,10 +151,7 @@ export default function LandingForm({ formData, onChange, onImageChange, onSubmi
           mt: 2,
           color: 'primary.main',
           borderColor: 'primary.main',
-          '&:hover': {
-            backgroundColor: 'primary.light',
-            borderColor: 'primary.main',
-          }
+          '&:hover': { backgroundColor: 'primary.light', borderColor: 'primary.main' }
         }}
         startIcon={<AddPhotoAlternateIcon />}
       >
@@ -115,9 +160,7 @@ export default function LandingForm({ formData, onChange, onImageChange, onSubmi
           type="file"
           accept="image/*,video/*"
           hidden
-          onChange={(e) => {
-            if (e.target.files?.[0]) onImageChange(e.target.files[0]);
-          }}
+          onChange={(e) => { if (e.target.files?.[0]) onImageChange(e.target.files[0]); }}
         />
       </Button>
 
@@ -135,8 +178,8 @@ export default function LandingForm({ formData, onChange, onImageChange, onSubmi
         <Box mt={2}>
           {waLink && (
             <Typography variant="body2" sx={{ mb: 1 }}>
-              Enlace de WhatsApp:{''}
-              <MuiLink href={waLink} target="_blank" rel="noopener"> {waLink} </MuiLink>
+              Enlace de WhatsApp:{' '}
+              <MuiLink href={waLink} target="_blank" rel="noopener">{waLink}</MuiLink>
             </Typography>
           )}
           {mapSrc && (

@@ -20,6 +20,8 @@ interface AppointmentModalProps {
   bankAccount: string;
   companyId: string;
   idNumber?: string;
+  bankType?: string;    
+  bankQrUrl?: string;
 }
 
 function AvailabilityGrid({
@@ -198,7 +200,7 @@ function AvailabilityGrid({
 
 export default function AppointmentModal({
   open, onClose, onConfirm,
-  selectedServices, bankAccount, companyId, idNumber
+  selectedServices, bankAccount, companyId, idNumber, bankType, bankQrUrl
 }: AppointmentModalProps) {
   const [fechaISO, setFechaISO] = useState<string | null>(null);
   const [comprobante, setComprobante] = useState<File | null>(null);
@@ -223,8 +225,20 @@ export default function AppointmentModal({
         <DialogContent dividers>
           <Typography mb={2}>Debes depositar el 50% del servicio al siguiente número de cuenta:</Typography>
           <Alert severity="info" sx={{ mb: 2, fontWeight: 500 }}>
+            {bankType && <DialogContentText>Banco: {bankType}</DialogContentText>}
             {bankAccount && <DialogContentText>Cuenta: {bankAccount}</DialogContentText>}
             {idNumber && <DialogContentText>Cédula/RUC: {idNumber}</DialogContentText>}
+            
+            {bankQrUrl && (
+              <Box mt={1} textAlign="center">
+                <div style={{ fontSize: 12, marginBottom: 4 }}>Paga con banca móvil</div>
+                <img
+                  src={bankQrUrl}
+                  alt="QR banca móvil"
+                  style={{ width: 140, height: 140, objectFit: 'contain', borderRadius: 8 }}
+                />
+              </Box>
+            )}
           </Alert>
 
           {ready ? (

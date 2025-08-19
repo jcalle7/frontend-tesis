@@ -17,22 +17,6 @@ const Transition = React.forwardRef<HTMLDivElement, TransitionProps & { children
   }
 );
 
-type LandingState = {
-  cover_url: string;
-  title: string;
-  facebook_url: string;
-  instagram_url: string;
-  tiktok_url: string;
-  phone: string;
-  address: string;
-  email: string;
-  bank_account: string;
-  cedula: string;
-  whatsapp_url: string;
-  whatsapp_number: string;
-  map_url: string;
-};
-
 export default function ServiceManager() {
   const { services, createOrUpdateService, deleteService } = useServices();
 
@@ -44,7 +28,7 @@ export default function ServiceManager() {
     duracion: '',
     descripcion: '',
     imagen: '',
-    extras_note: '',                 
+    extras_note: '',
   });
   const [editingId, setEditingId] = useState<number | null>(null);
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 });
@@ -70,8 +54,10 @@ export default function ServiceManager() {
     whatsapp_url: '',
     whatsapp_number: '',
     map_url: '',
-
+    bank_type: '',        // NUEVO
+    bank_qr_url: '',      
   });
+  const [qrUploading, setQrUploading] = useState(false);   
   const [initialLanding, setInitialLanding] = useState<typeof landingForm | null>(null);
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [companySlug, setCompanySlug] = useState<string | null>(null);
@@ -92,28 +78,16 @@ export default function ServiceManager() {
     setCompanyId(companyData.company_id);
 
     if (companyData.company_id) {
-    const { data: companyDetails, error: slugError } = await supabase
-    .from('companies')
-    .select('id, slug, name')
-    .eq('id', companyData.company_id)
-    .maybeSingle();
+      const { data: companyDetails, error: slugError } = await supabase
+        .from('companies')
+        .select('id, slug, name')
+        .eq('id', companyData.company_id)
+        .maybeSingle();
 
-    if (companyDetails?.slug) {
-    setCompanySlug(companyDetails.slug);
+      if (companyDetails?.slug) setCompanySlug(companyDetails.slug);
+      setCompanyName(companyDetails?.name || '');
+      if (slugError) console.error('❌ Error obteniendo slug:', slugError.message);
     }
-    setCompanyName(companyDetails?.name || '');
-
-    if (slugError) {
-      console.error('❌ Error obteniendo slug:', slugError.message);
-    }
-
-    if (companyDetails?.slug) {
-      setCompanySlug(companyDetails.slug);
-
-    } else {
-      console.warn('⚠️ La empresa no tiene slug registrado en Supabase.');
-    }
-};
 
     const { data: existingLanding } = await supabase
       .from('landing_data')
@@ -136,46 +110,40 @@ export default function ServiceManager() {
         whatsapp_url: existingLanding?.whatsapp_url ?? '',
         whatsapp_number: existingLanding?.whatsapp_number ?? '',
         map_url: existingLanding?.map_url ?? '',
+        bank_type: existingLanding?.bank_type ?? '',         // NUEVO
+        bank_qr_url: existingLanding?.bank_qr_url ?? '',     // NUEVO
       };
 
-    setLandingForm(fullLanding);
-    setInitialLanding(fullLanding);
+      setLandingForm(fullLanding);
+      setInitialLanding(fullLanding);
     } else {
-  // 👉 NUEVO: si no hay landing creada, fija el estado inicial actual
-  const emptyLanding = {
-    cover_url: '',
-    title: '',
-    facebook_url: '',
-    instagram_url: '',
-    tiktok_url: '',
-    phone: '',
-    address: '',
-    email: '',
-    bank_account: '',
-    cedula: '',
-    whatsapp_url: '',
-    whatsapp_number: '',
-    map_url: '',
-  };
-  setLandingForm(emptyLanding);
-  setInitialLanding(emptyLanding);
-}
+      const emptyLanding = {
+        cover_url: '',
+        title: '',
+        facebook_url: '',
+        instagram_url: '',
+        tiktok_url: '',
+        phone: '',
+        address: '',
+        email: '',
+        bank_account: '',
+        cedula: '',
+        whatsapp_url: '',
+        whatsapp_number: '',
+        map_url: '',
+        bank_type: '',         // NUEVO
+        bank_qr_url: '',       // NUEVO
+      };
+      setLandingForm(emptyLanding);
+      setInitialLanding(emptyLanding);
+    }
   };
 
-  useEffect(() => {
-    fetchLandingData();
-  }, []);
+  useEffect(() => { fetchLandingData(); }, []);
 
   const handleLandingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
-  setLandingForm((prev) => ({ ...prev, [name]: value }));
-  const hasChanges =
-  initialLanding
-    ? JSON.stringify(landingForm) !== JSON.stringify(initialLanding)
-    : Object.values(landingForm).some((v) =>
-        typeof v === 'string' ? v.trim() !== '' : v != null
-      );
+    setLandingForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleLandingImageChange = async (file: File) => {
@@ -189,89 +157,100 @@ export default function ServiceManager() {
     setLandingForm((prev) => ({ ...prev, cover_url: data.publicUrl }));
   };
 
-const handleLandingSubmit = async () => {
+  // NUEVO: subir QR
+const handleQrChange = async (file: File) => {
   if (!companyId) return;
-
-    try {
-    const payload = {
-      company_id: companyId,
-      cover_url: landingForm.cover_url || null,
-      title: landingForm.title || '',
-      facebook_url: landingForm.facebook_url || null,
-      instagram_url: landingForm.instagram_url || null,
-      tiktok_url: landingForm.tiktok_url || null,
-      phone: landingForm.phone || null,
-      address: landingForm.address || null,
-      email: landingForm.email || null,
-      bank_account: landingForm.bank_account || null,
-      cedula: landingForm.cedula || null,
-      whatsapp_url: landingForm.whatsapp_url || null,
-      whatsapp_number: landingForm.whatsapp_number || null,
-      map_url: landingForm.map_url || null,
-      updated_at: new Date().toISOString(),
-    };
-
-    // 👉 un solo upsert, sin SELECT previo (evita 406)
-    const { error } = await supabase
-      .from('landing_data')
-      .upsert(payload, { onConflict: 'company_id' });
-
+  try {
+    setQrUploading(true);
+    const filePath = `qr/${companyId}/${Date.now()}-${file.name}`;
+    const { error } = await supabase.storage.from('imagenes').upload(filePath, file, { upsert: true });
     if (error) throw error;
 
-    setSnackbar({ open: true, message: `✅ Configuración guardada para ${companyName}.`, severity: 'success' });
-    setInitialLanding({ ...landingForm });
+    const { data } = supabase.storage.from('imagenes').getPublicUrl(filePath);
+    setLandingForm((prev) => ({ ...prev, bank_qr_url: data.publicUrl }));
+    setSnackbar({ open: true, message: '✅ QR subido correctamente.', severity: 'success' });
   } catch (e: any) {
-    console.error('[Guardar landing] ', e);
-    setSnackbar({ open: true, message: `❌ Error guardando: ${e?.message ?? e}`, severity: 'error' });
-  };
-
-  const { data: existing } = await supabase
-    .from('landing_data')
-    .select('id')
-    .eq('company_id', companyId)
-    .single();
-
-  const cleanedLanding = {
-    cover_url: landingForm.cover_url,
-    title: landingForm.title,
-    facebook_url: landingForm.facebook_url,
-    instagram_url: landingForm.instagram_url,
-    tiktok_url: landingForm.tiktok_url,
-    phone: landingForm.phone,
-    address: landingForm.address,
-    email: landingForm.email,
-    bank_account: landingForm.bank_account,
-    cedula: landingForm.cedula,
-    whatsapp_url: landingForm.whatsapp_url,
-    whatsapp_number: landingForm.whatsapp_number,
-    map_url: landingForm.map_url,
-  };
-
-  if (existing) {
-    const { error: updateError } = await supabase
-      .from('landing_data')
-      .update(cleanedLanding)
-      .eq('company_id', companyId);
-
-    if (updateError) {
-      setSnackbar({ open: true, message: '❌ Error actualizando landing.', severity: 'error' });
-    } else {
-      setSnackbar({ open: true, message: `✅ Se actualizó la landing de ${companyName} correctamente.`, severity: 'success' });
-      setInitialLanding({ ...landingForm });
-    }
-  } else {
-    const { error: insertError } = await supabase
-      .from('landing_data')
-      .insert([{ company_id: companyId, ...cleanedLanding }]);
-
-    if (insertError) {
-      setSnackbar({ open: true, message: '❌ Error creando landing.', severity: 'error' });
-    } else {
-      setSnackbar({ open: true, message: '✅ Landing creada.', severity: 'success' });
-      setInitialLanding({ ...landingForm });
-    }
+    setSnackbar({ open: true, message: `❌ Error subiendo QR: ${e?.message ?? e}`, severity: 'error' });
+  } finally {
+    setQrUploading(false);
   }
 };
+
+  const handleLandingSubmit = async () => {
+    if (!companyId) return;
+
+    try {
+      const payload = {
+        company_id: companyId,
+        cover_url: landingForm.cover_url || null,
+        title: landingForm.title || '',
+        facebook_url: landingForm.facebook_url || null,
+        instagram_url: landingForm.instagram_url || null,
+        tiktok_url: landingForm.tiktok_url || null,
+        phone: landingForm.phone || null,
+        address: landingForm.address || null,
+        email: landingForm.email || null,
+        bank_account: landingForm.bank_account || null,
+        cedula: landingForm.cedula || null,
+        whatsapp_url: landingForm.whatsapp_url || null,
+        whatsapp_number: landingForm.whatsapp_number || null,
+        map_url: landingForm.map_url || null,
+        bank_type: landingForm.bank_type || null,     // NUEVO
+        bank_qr_url: landingForm.bank_qr_url || null, // NUEVO
+        updated_at: new Date().toISOString(),
+      };
+
+      // upsert principal
+      const { error } = await supabase
+        .from('landing_data')
+        .upsert(payload, { onConflict: 'company_id' });
+      if (error) throw error;
+
+      // mantiene tu flujo previo (update/insert) por compatibilidad
+      const { data: existing } = await supabase
+        .from('landing_data')
+        .select('id')
+        .eq('company_id', companyId)
+        .single();
+
+      const cleanedLanding = {
+        cover_url: landingForm.cover_url,
+        title: landingForm.title,
+        facebook_url: landingForm.facebook_url,
+        instagram_url: landingForm.instagram_url,
+        tiktok_url: landingForm.tiktok_url,
+        phone: landingForm.phone,
+        address: landingForm.address,
+        email: landingForm.email,
+        bank_account: landingForm.bank_account,
+        cedula: landingForm.cedula,
+        whatsapp_url: landingForm.whatsapp_url,
+        whatsapp_number: landingForm.whatsapp_number,
+        map_url: landingForm.map_url,
+        bank_type: landingForm.bank_type,        // NUEVO
+        bank_qr_url: landingForm.bank_qr_url,    // NUEVO
+      };
+
+      if (existing) {
+        const { error: updateError } = await supabase
+          .from('landing_data')
+          .update(cleanedLanding)
+          .eq('company_id', companyId);
+        if (updateError) throw updateError;
+      } else {
+        const { error: insertError } = await supabase
+          .from('landing_data')
+          .insert([{ company_id: companyId, ...cleanedLanding }]);
+        if (insertError) throw insertError;
+      }
+
+      setSnackbar({ open: true, message: `✅ Configuración guardada para ${companyName}.`, severity: 'success' });
+      setInitialLanding({ ...landingForm });
+    } catch (e: any) {
+      console.error('[Guardar landing] ', e);
+      setSnackbar({ open: true, message: `❌ Error guardando: ${e?.message ?? e}`, severity: 'error' });
+    }
+  };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, files } = e.target;
@@ -304,7 +283,7 @@ const handleLandingSubmit = async () => {
       duracion: service.duracion,
       descripcion: service.descripcion,
       imagen: service.imagen,
-      extras_note: service.extras_note || '',     
+      extras_note: service.extras_note || '',
     });
     setEditingId(service.id);
     setFormOpen(true);
@@ -322,6 +301,7 @@ const handleLandingSubmit = async () => {
       setConfirmDeleteId(null);
     }
   };
+
   const hasChanges = initialLanding !== null && JSON.stringify(landingForm) !== JSON.stringify(initialLanding);
 
   return (
@@ -354,29 +334,25 @@ const handleLandingSubmit = async () => {
         formData={landingForm}
         onChange={handleLandingChange}
         onImageChange={handleLandingImageChange}
+        onQrChange={handleQrChange}            // NUEVO
         onSubmit={handleLandingSubmit}
         disabled={!hasChanges}
       />
 
       {companySlug && (
-      <Box mt={3} display="flex" justifyContent="center">
-      <Button
-      variant="outlined"
-      color="info"
-      size="large"
-      startIcon={<VisibilityIcon />}
-      onClick={() => window.open(`/empresa/${companySlug}`, '_blank')}
-      sx={{
-        textTransform: 'none',
-        fontWeight: 500,
-        px: 3,
-        borderRadius: 2,
-      }}
-      >
-      Ver mi landing
-      </Button>
-      </Box>
-    )}
+        <Box mt={3} display="flex" justifyContent="center">
+          <Button
+            variant="outlined"
+            color="info"
+            size="large"
+            startIcon={<VisibilityIcon />}
+            onClick={() => window.open(`/empresa/${companySlug}`, '_blank')}
+            sx={{ textTransform: 'none', fontWeight: 500, px: 3, borderRadius: 2 }}
+          >
+            Ver mi landing
+          </Button>
+        </Box>
+      )}
 
       <Dialog open={confirmDeleteId !== null} TransitionComponent={Transition} keepMounted onClose={() => setConfirmDeleteId(null)}>
         <DialogTitle>¿Seguro que quieres eliminar este servicio?</DialogTitle>
